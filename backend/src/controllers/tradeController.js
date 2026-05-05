@@ -1,0 +1,217 @@
+const Trade = require('../models/Trade');
+const Item = require('../models/Item');
+const Rating = require('../models/Rating');
+const User = require('../models/User');
+
+exports.createTrade = async (req, res, next) => {
+  try {
+    const { receiverId, offeredItemIds, requestedItemIds } = req.body;
+    const initiatorId = req.user._id;
+
+    if (initiatorId.toString() === receiverId) {
+      return res.status(400).json({ message: 'Cannot trade with yourself' });
+    }
+
+    // Validate offered items belong to initiator and are available
+    const offeredItems = await Item.find({
+      _id: { $in: offeredItemIds },
+      owner: initiatorId,
+      status: 'available',
+    });
+    if (offeredItems.length !== offeredItemIds.length) {
+      return res.status(400).json({ message: 'One or more offered items are invalid or unavailable' });
+    }
+
+    // Validate requested items belong to receiver and are available
+    const requestedItems = await Item.find({
+      _id: { $in: requestedItemIds },
+      owner: receiverId,
+      status: 'available',
+    });
+    if (requestedItems.length !== requestedItemIds.length) {
+      return res.status(400).json({ message: 'One or more requested items are invalid or unavailable' });
+    }
+
+    const trade = await Trade.create({
+      initiator: initiatorId,
+      receiver: receiverId,
+      offeredItems: offeredItemIds,
+      requestedItems: requestedItemIds,
+    });
+
+    const populated = await Trade.findById(trade._id)
+      .populate('initiator', 'username trustScore profilePic')
+      .populate('receiver', 'username trustScore profilePic')
+      .populate('offeredItems')
+      .populate('requestedItems');
+
+    res.status(201).json(populated);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getTrades = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { status } = req.query;
+    const filter = {
+      $or: [{ initiator: userId }, { receiver: userId }],
+    };
+    if (status) filter.status = status;
+
+    const trades = await Trade.find(filter)
+      .populate('initiator', 'username trustScore profilePic')
+      .populate('receiver', 'username trustScore profilePic')
+      .populate('offeredItems', 'title images swapPointValue category')
+      .populate('requestedItems', 'title images swapPointValue category')
+      .sort({ createdAt: -1 });
+
+    res.json(trades);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getTrade = async (req, res, next) => {
+  try {
+    const trade = await Trade.findById(req.params.id)
+      .populate('initiator', 'username trustScore profilePic')
+      .populate('receiver', 'username trustScore profilePic')
+      .populate('offeredItems')
+      .populate('requestedItems');
+
+    if (!trade) return res.status(404).json({ message: 'Trade not found' });
+
+    const userId = req.user._id.toString();
+    if (trade.initiator._id.toString() !== userId && trade.receiver._id.toString() !== userId) {
+      return res.status(403).json({ message: 'Not authorized to view this trade' });
+    }
+
+    res.json(trade);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateTradeStatus = async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    const trade = await Trade.findById(req.params.id);
+
+    if (!trade) return res.status(404).json({ message: 'Trade not found' });
+
+    const userId = req.user._id.toString();
+    const isInitiator = trade.initiator.toString() === userId;
+    const isReceiver = trade.receiver.toString() === userId;
+
+    if (!isInitiator && !isReceiver) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    // State machine validation
+    const validTransitions = {
+      pending: {
+        accepted: () => isReceiver,
+        cancelled: () => isInitiator || isReceiver,
+      },
+      accepted: {
+        completed: () => isInitiator || isReceiver,
+        cancelled: () => isInitiator || isReceiver,
+      },
+    };
+
+    const transitions = validTransitions[trade.status];
+    if (!transitions || !transitions[status] || !transitions[status]()) {
+      return res.status(400).json({
+        message: `Cannot transition from "${trade.status}" to "${status}" with your role`,
+      });
+    }
+
+    trade.status = status;
+
+    // Lock items when trade is accepted
+    if (status === 'accepted') {
+      await Item.updateMany(
+        { _id: { $in: [...trade.offeredItems, ...trade.requestedItems] } },
+        { status: 'in_trade' }
+      );
+    }
+
+    // Mark items as swapped when completed
+    if (status === 'completed') {
+      trade.completedAt = new Date();
+      await Item.updateMany(
+        { _id: { $in: [...trade.offeredItems, ...trade.requestedItems] } },
+        { status: 'swapped' }
+      );
+    }
+
+    // Release items when cancelled
+    if (status === 'cancelled') {
+      await Item.updateMany(
+        { _id: { $in: [...trade.offeredItems, ...trade.requestedItems] }, status: 'in_trade' },
+        { status: 'available' }
+      );
+    }
+
+    await trade.save();
+
+    const populated = await Trade.findById(trade._id)
+      .populate('initiator', 'username trustScore profilePic')
+      .populate('receiver', 'username trustScore profilePic')
+      .populate('offeredItems')
+      .populate('requestedItems');
+
+    res.json(populated);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.rateTrade = async (req, res, next) => {
+  try {
+    const { score, comment } = req.body;
+    const trade = await Trade.findById(req.params.id);
+
+    if (!trade) return res.status(404).json({ message: 'Trade not found' });
+    if (trade.status !== 'completed') {
+      return res.status(400).json({ message: 'Can only rate completed trades' });
+    }
+
+    const userId = req.user._id.toString();
+    const isInitiator = trade.initiator.toString() === userId;
+    const isReceiver = trade.receiver.toString() === userId;
+
+    if (!isInitiator && !isReceiver) {
+      return res.status(403).json({ message: 'Not authorized to rate this trade' });
+    }
+
+    const ratedUserId = isInitiator ? trade.receiver : trade.initiator;
+
+    // Check for duplicate rating
+    const existing = await Rating.findOne({ trade: trade._id, rater: req.user._id });
+    if (existing) {
+      return res.status(409).json({ message: 'You have already rated this trade' });
+    }
+
+    const rating = await Rating.create({
+      trade: trade._id,
+      rater: req.user._id,
+      ratedUser: ratedUserId,
+      score,
+      comment: comment || '',
+    });
+
+    // Recalculate trust score
+    const ratedUser = await User.findById(ratedUserId);
+    ratedUser.totalRatings += 1;
+    ratedUser.ratingSum += score;
+    ratedUser.trustScore = parseFloat((ratedUser.ratingSum / ratedUser.totalRatings).toFixed(1));
+    await ratedUser.save();
+
+    res.status(201).json(rating);
+  } catch (err) {
+    next(err);
+  }
+};
