@@ -71,10 +71,10 @@ export default function NewItemPage() {
 
           <div style={{ marginBottom:18 }}><label className="label">Desired Items (comma-separated)</label><input name="desiredItems" className="input" placeholder="e.g. Books, Guitar, Camera" value={form.desiredItems} onChange={handleChange} /></div>
           <div style={{ marginBottom:24 }}>
-            <label className="label">Images (up to 5)</label>
+            <label className="label">Images (Capture your item — up to 5)</label>
             <label style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:24, borderRadius:'var(--radius)', border:'2px dashed var(--color-border)', cursor:'pointer', color:'var(--color-text-muted)', fontSize:'0.85rem', transition:'border-color 0.2s' }}>
-              <Upload size={18} /> {files.length > 0 ? `${files.length} file(s) selected` : 'Click to upload images'}
-              <input type="file" multiple accept="image/*" onChange={(e) => setFiles([...e.target.files].slice(0,5))} style={{ display:'none' }} />
+              <Upload size={18} /> {files.length > 0 ? `${files.length} photo(s) captured` : 'Tap to open Camera'}
+              <input type="file" multiple accept="image/*" capture="environment" onChange={(e) => setFiles([...e.target.files].slice(0,5))} style={{ display:'none' }} />
             </label>
           </div>
           <button type="submit" className="btn btn-primary btn-lg" disabled={loading} style={{ width:'100%' }}>

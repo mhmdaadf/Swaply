@@ -1,6 +1,17 @@
 const Item = require('../models/Item');
 const { estimateValue } = require('../services/valueEstimator');
 
+// Parse desiredItems from multipart form data (may arrive as JSON string or comma-separated)
+function parseDesiredItems(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw.map(s => s.trim()).filter(Boolean);
+  if (typeof raw === 'string') {
+    try { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) return parsed; } catch {}
+    return raw.split(',').map(s => s.trim()).filter(Boolean);
+  }
+  return [];
+}
+
 exports.createItem = async (req, res, next) => {
   try {
     const { title, description, category, condition, originalPrice, ageMonths, desiredItems } = req.body;
@@ -16,7 +27,7 @@ exports.createItem = async (req, res, next) => {
       originalPrice,
       ageMonths: ageMonths || 0,
       swapPointValue,
-      desiredItems: desiredItems || [],
+      desiredItems: parseDesiredItems(desiredItems),
       owner: req.user._id,
     });
 

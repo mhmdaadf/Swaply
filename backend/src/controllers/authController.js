@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/User');
+const emailService = require('../services/emailService');
 
 const generateTokens = (userId) => {
   const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -28,6 +30,8 @@ exports.register = async (req, res, next) => {
       password,
       wishlistCategories: wishlistCategories || [],
     });
+
+    await emailService.sendWelcomeEmail(user);
 
     const tokens = generateTokens(user._id);
     res.status(201).json({ user, ...tokens });
@@ -78,5 +82,73 @@ exports.refresh = async (req, res) => {
     res.json(tokens);
   } catch (err) {
     return res.status(401).json({ message: 'Invalid or expired refresh token' });
+  }
+};
+
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const { username, email, wishlistCategories } = req.body;
+    const user = await User.findById(req.user.id);
+
+    if (username && username !== user.username) {
+      const exists = await User.findOne({ username });
+      if (exists) return res.status(409).json({ message: 'Username already taken' });
+      user.username = username;
+    }
+
+    if (email && email !== user.email) {
+      const exists = await User.findOne({ email });
+      if (exists) return res.status(409).json({ message: 'Email already in use' });
+      user.email = email;
+    }
+
+    if (wishlistCategories) user.wishlistCategories = wishlistCategories;
+
+    await user.save();
+    res.json({ user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) return res.status(404).json({ message: 'No user found with that email' });
+
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    await user.save();
+
+    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+    await emailService.sendPasswordResetEmail(user, resetUrl);
+
+    res.json({ message: 'Password reset email sent' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const resetPasswordToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) return res.status(400).json({ message: 'Invalid or expired reset token' });
+
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.json({ message: 'Password reset successful' });
+  } catch (err) {
+    next(err);
   }
 };

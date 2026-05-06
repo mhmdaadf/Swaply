@@ -2,6 +2,7 @@ const Trade = require('../models/Trade');
 const Item = require('../models/Item');
 const Rating = require('../models/Rating');
 const User = require('../models/User');
+const emailService = require('../services/emailService');
 
 exports.createTrade = async (req, res, next) => {
   try {
@@ -40,10 +41,13 @@ exports.createTrade = async (req, res, next) => {
     });
 
     const populated = await Trade.findById(trade._id)
-      .populate('initiator', 'username trustScore profilePic')
-      .populate('receiver', 'username trustScore profilePic')
+      .populate('initiator', 'username email trustScore profilePic')
+      .populate('receiver', 'username email trustScore profilePic')
       .populate('offeredItems')
       .populate('requestedItems');
+
+    // Notify receiver
+    await emailService.sendTradeNotification(populated.receiver, populated.initiator, 'new_proposal');
 
     res.status(201).json(populated);
   } catch (err) {
@@ -97,13 +101,15 @@ exports.getTrade = async (req, res, next) => {
 exports.updateTradeStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
-    const trade = await Trade.findById(req.params.id);
+    const trade = await Trade.findById(req.params.id)
+      .populate('initiator', 'username email')
+      .populate('receiver', 'username email');
 
     if (!trade) return res.status(404).json({ message: 'Trade not found' });
 
     const userId = req.user._id.toString();
-    const isInitiator = trade.initiator.toString() === userId;
-    const isReceiver = trade.receiver.toString() === userId;
+    const isInitiator = trade.initiator._id.toString() === userId;
+    const isReceiver = trade.receiver._id.toString() === userId;
 
     if (!isInitiator && !isReceiver) {
       return res.status(403).json({ message: 'Not authorized' });
@@ -136,6 +142,8 @@ exports.updateTradeStatus = async (req, res, next) => {
         { _id: { $in: [...trade.offeredItems, ...trade.requestedItems] } },
         { status: 'in_trade' }
       );
+      // Notify initiator that their trade was accepted
+      await emailService.sendTradeNotification(trade.initiator, trade.receiver, 'accepted');
     }
 
     // Mark items as swapped when completed
@@ -145,6 +153,10 @@ exports.updateTradeStatus = async (req, res, next) => {
         { _id: { $in: [...trade.offeredItems, ...trade.requestedItems] } },
         { status: 'swapped' }
       );
+      // Notify other user
+      const notifier = isInitiator ? trade.initiator : trade.receiver;
+      const notified = isInitiator ? trade.receiver : trade.initiator;
+      await emailService.sendTradeNotification(notified, notifier, 'completed');
     }
 
     // Release items when cancelled

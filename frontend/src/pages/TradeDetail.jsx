@@ -69,12 +69,36 @@ export default function TradeDetail() {
               <span className={`badge ${trade.status === 'completed' ? 'badge-success' : trade.status === 'cancelled' ? 'badge-error' : trade.status === 'accepted' ? 'badge-brand' : 'badge-accent'}`}>{trade.status}</span>
             </div>
             <div style={{ marginBottom: 16 }}>
-              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: 8 }}>Offered Items</p>
-              {trade.offeredItems.map(i => <div key={i._id} style={{ padding: '6px 0', fontSize: '0.9rem' }}>{i.title} <span style={{ color: 'var(--color-accent)', fontSize: '0.8rem' }}>{i.swapPointValue}pts</span></div>)}
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: 12 }}>Offered Items</p>
+              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                {trade.offeredItems.map(i => (
+                  <div key={i._id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width:40, height:40, borderRadius:'var(--radius)', background:'var(--color-surface-elevated)', overflow:'hidden', border:'1px solid var(--color-border)', flexShrink:0 }}>
+                      <img src={i.images?.[0] || 'https://via.placeholder.com/40'} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '0.9rem', fontWeight: 500 }}>{i.title}</p>
+                      <p style={{ color: 'var(--color-accent)', fontSize: '0.75rem' }}>{i.swapPointValue} pts</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
             <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
-              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: 8 }}>Requested Items</p>
-              {trade.requestedItems.map(i => <div key={i._id} style={{ padding: '6px 0', fontSize: '0.9rem' }}>{i.title} <span style={{ color: 'var(--color-accent)', fontSize: '0.8rem' }}>{i.swapPointValue}pts</span></div>)}
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: 12 }}>Requested Items</p>
+              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                {trade.requestedItems.map(i => (
+                  <div key={i._id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width:40, height:40, borderRadius:'var(--radius)', background:'var(--color-surface-elevated)', overflow:'hidden', border:'1px solid var(--color-border)', flexShrink:0 }}>
+                      <img src={i.images?.[0] || 'https://via.placeholder.com/40'} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '0.9rem', fontWeight: 500 }}>{i.title}</p>
+                      <p style={{ color: 'var(--color-accent)', fontSize: '0.75rem' }}>{i.swapPointValue} pts</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 

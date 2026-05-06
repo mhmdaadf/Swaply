@@ -12,6 +12,9 @@ import TradesPage from './pages/TradesPage';
 import TradeDetail from './pages/TradeDetail';
 import NewTradePage from './pages/NewTradePage';
 import EstimatorPage from './pages/EstimatorPage';
+import ProfilePage from './pages/ProfilePage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function ProtectedRoute({ children }) {
   const { accessToken } = useAuthStore();
@@ -41,7 +44,11 @@ export default function App() {
         <Route path="/trades/new" element={<ProtectedRoute><NewTradePage /></ProtectedRoute>} />
         <Route path="/trades/:id" element={<ProtectedRoute><TradeDetail /></ProtectedRoute>} />
         <Route path="/estimator" element={<ProtectedRoute><EstimatorPage /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
+        <Route path="/reset-password/:token" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

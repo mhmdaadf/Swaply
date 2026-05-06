@@ -49,6 +49,9 @@ export default function NewTradePage() {
             {myItems.map(item => (
               <label key={item._id} className="card" style={{ padding:12, display:'flex', alignItems:'center', gap:12, cursor:'pointer', borderColor: selectedOffered.includes(item._id) ? 'var(--color-brand)' : undefined }}>
                 <input type="checkbox" checked={selectedOffered.includes(item._id)} onChange={() => toggleOffered(item._id)} />
+                <div style={{ width:40, height:40, borderRadius:'var(--radius)', background:'var(--color-surface-elevated)', overflow:'hidden', border:'1px solid var(--color-border)', flexShrink:0 }}>
+                  <img src={item.images?.[0] || 'https://via.placeholder.com/40'} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                </div>
                 <div style={{ flex:1 }}>
                   <p style={{ fontWeight:500, fontSize:'0.9rem' }}>{item.title}</p>
                   <p style={{ fontSize:'0.75rem', color:'var(--color-text-muted)' }}>{item.category} — {item.swapPointValue} pts</p>

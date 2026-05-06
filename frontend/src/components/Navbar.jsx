@@ -35,7 +35,7 @@ export default function Navbar() {
         height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         {/* Logo */}
-        <Link to="/dashboard" style={{
+        <Link to="/" style={{
           display: 'flex', alignItems: 'center', gap: 8,
           fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.03em',
         }}>
@@ -72,27 +72,30 @@ export default function Navbar() {
           <Link to="/items/new" className="btn btn-primary btn-sm">
             <PlusCircle size={14} /> List Item
           </Link>
-          <div style={{
+          <Link to="/profile" style={{
             display: 'flex', alignItems: 'center', gap: 8,
             padding: '6px 12px', borderRadius: 'var(--radius)',
             background: 'var(--color-surface-elevated)',
             border: '1px solid var(--color-border)',
-          }}>
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }} className="user-profile-link">
             <User size={14} style={{ color: 'var(--color-brand-light)' }} />
             <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>{user.username}</span>
             <span className="badge badge-accent" style={{ fontSize: '0.65rem' }}>
               {user.trustScore?.toFixed(1)}
             </span>
-          </div>
-          <button onClick={handleLogout} className="btn btn-secondary btn-sm" title="Logout">
-            <LogOut size={14} />
-          </button>
+          </Link>
         </div>
       </div>
 
       <style>{`
         @media (max-width: 768px) {
           .nav-label { display: none; }
+        }
+        .user-profile-link:hover {
+          border-color: var(--color-brand-light) !important;
+          background: rgba(99,102,241,0.05) !important;
         }
       `}</style>
     </nav>

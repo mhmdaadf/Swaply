@@ -45,15 +45,47 @@ export default function MatchesPage() {
                   <span className="badge badge-brand">Score: {m.score}</span>
                 </div>
               </div>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr auto 1fr', gap:16, alignItems:'center' }}>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr auto 1fr', gap:24, alignItems:'center' }}>
                 <div>
-                  <p style={{ fontSize:'0.75rem', color:'var(--color-text-muted)', marginBottom:8 }}>They have</p>
-                  {m.theirItems.map(i => <div key={i._id} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 0' }}><span className="badge badge-neutral">{i.category}</span><span style={{ fontSize:'0.85rem' }}>{i.title}</span><span style={{ fontSize:'0.75rem', color:'var(--color-accent)' }}>{i.swapPointValue}pts</span></div>)}
+                  <p style={{ fontSize:'0.75rem', color:'var(--color-text-muted)', marginBottom:12 }}>They have</p>
+                  <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                    {m.theirItems.map(i => (
+                      <div key={i._id} style={{ display:'flex', alignItems:'center', gap:12 }}>
+                        <div style={{ width:48, height:48, borderRadius:'var(--radius)', background:'var(--color-surface-elevated)', overflow:'hidden', border:'1px solid var(--color-border)', flexShrink:0 }}>
+                          <img src={i.images?.[0] || 'https://via.placeholder.com/48'} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                        </div>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <p style={{ fontSize:'0.85rem', fontWeight:500, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{i.title}</p>
+                          <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                            <span className="badge badge-neutral" style={{ fontSize:'0.6rem', padding:'1px 6px' }}>{i.category}</span>
+                            <span style={{ fontSize:'0.75rem', color:'var(--color-accent)', fontWeight:600 }}>{i.swapPointValue}pts</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <ArrowRightLeft size={24} style={{ color:'var(--color-brand-light)' }} />
+
+                <ArrowRightLeft size={24} style={{ color:'var(--color-brand-light)', opacity:0.5 }} />
+
                 <div>
-                  <p style={{ fontSize:'0.75rem', color:'var(--color-text-muted)', marginBottom:8 }}>You offer</p>
-                  {m.myItems.map(i => <div key={i._id} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 0' }}><span className="badge badge-neutral">{i.category}</span><span style={{ fontSize:'0.85rem' }}>{i.title}</span><span style={{ fontSize:'0.75rem', color:'var(--color-accent)' }}>{i.swapPointValue}pts</span></div>)}
+                  <p style={{ fontSize:'0.75rem', color:'var(--color-text-muted)', marginBottom:12 }}>You offer</p>
+                  <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                    {m.myItems.map(i => (
+                      <div key={i._id} style={{ display:'flex', alignItems:'center', gap:12 }}>
+                        <div style={{ width:48, height:48, borderRadius:'var(--radius)', background:'var(--color-surface-elevated)', overflow:'hidden', border:'1px solid var(--color-border)', flexShrink:0 }}>
+                          <img src={i.images?.[0] || 'https://via.placeholder.com/48'} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                        </div>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <p style={{ fontSize:'0.85rem', fontWeight:500, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{i.title}</p>
+                          <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                            <span className="badge badge-neutral" style={{ fontSize:'0.6rem', padding:'1px 6px' }}>{i.category}</span>
+                            <span style={{ fontSize:'0.75rem', color:'var(--color-accent)', fontWeight:600 }}>{i.swapPointValue}pts</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
               <button className="btn btn-accent" style={{ marginTop:16, width:'100%' }} onClick={() => navigate(`/trades/new?receiverId=${m.user._id}&requestedItem=${m.theirItems[0]?._id}&offeredItem=${m.myItems[0]?._id}`)}>

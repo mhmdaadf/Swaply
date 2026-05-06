@@ -14,7 +14,7 @@ export default function LoginPage() {
     try {
       await login({ email, password });
       navigate('/dashboard');
-    } catch {}
+    } catch { }
   };
 
   return (
@@ -70,6 +70,9 @@ export default function LoginPage() {
                   value={password} onChange={(e) => setPassword(e.target.value)}
                   required style={{ paddingLeft: 38 }}
                 />
+              </div>
+              <div style={{ textAlign: 'right', marginTop: 8 }}>
+                <Link to="/forgot-password" style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textDecoration: 'none' }}>Forgot password?</Link>
               </div>
             </div>
 
