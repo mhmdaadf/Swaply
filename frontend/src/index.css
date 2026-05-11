@@ -85,7 +85,7 @@
   --shadow-accent: 0 4px 24px rgba(245, 158, 11, 0.2);
   --shadow-glow: 0 0 80px rgba(99, 102, 241, 0.06);
   --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.35),
-                       0 0 0 1px rgba(99, 102, 241, 0.08);
+    0 0 0 1px rgba(99, 102, 241, 0.08);
 
   /* Spacing Scale — 4px base grid
      Every spacing decision MUST use one of these values. */
@@ -132,8 +132,12 @@
 /* ═══════════════════════════════════════════════════════════════════
    GLOBAL RESETS & PERFORMANCE
    ═══════════════════════════════════════════════════════════════════ */
-*, *::before, *::after {
-  margin: 0; padding: 0; box-sizing: border-box;
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 html {
@@ -153,9 +157,19 @@ body {
   overflow-x: hidden;
 }
 
-a { color: inherit; text-decoration: none; }
-img { display: block; max-width: 100%; }
-button { font-family: inherit; }
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font-family: inherit;
+}
 
 /* ═══ Accessibility ═══ */
 :focus-visible {
@@ -166,29 +180,47 @@ button { font-family: inherit; }
 
 /* Reduced-motion: collapse ALL animations & transitions instantly */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  html { scroll-behavior: auto; }
+
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 /* ═══ Scrollbar — minimal, non-intrusive ═══ */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   transition: background var(--duration-fast);
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.12); }
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
 
 /* ═══ GPU-Accelerated Helpers ═══
    Use will-change sparingly — only on elements that WILL animate.
    Remove will-change after animation completes if possible. */
-.gpu { will-change: transform, opacity; }
+.gpu {
+  will-change: transform, opacity;
+}
 
 /* ═══ Utility Classes ═══ */
 .glass {
@@ -220,9 +252,10 @@ button { font-family: inherit; }
   border-radius: var(--radius-lg);
   /* Performance: only animate compositable properties */
   transition: border-color var(--duration-base) var(--ease-smooth),
-              box-shadow var(--duration-slow) var(--ease-smooth),
-              transform var(--duration-base) var(--ease-out);
+    box-shadow var(--duration-slow) var(--ease-smooth),
+    transform var(--duration-base) var(--ease-out);
 }
+
 @media (hover: hover) {
   .card:hover {
     border-color: var(--color-border-hover);
@@ -230,7 +263,10 @@ button { font-family: inherit; }
     transform: translateY(-3px);
   }
 }
-.card:active { transform: translateY(-1px); }
+
+.card:active {
+  transform: translateY(-1px);
+}
 
 /* ─── Buttons ─── 
    RULES: 
@@ -239,22 +275,32 @@ button { font-family: inherit; }
    • Gradient buttons get box-shadow glow on hover
    • Outlined buttons get border-color shift on hover */
 .btn {
-  display: inline-flex; align-items: center; justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: var(--space-2);
   padding: 10px 22px;
   border-radius: var(--radius);
-  font-weight: 600; font-size: var(--text-base);
-  cursor: pointer; border: none;
+  font-weight: 600;
+  font-size: var(--text-base);
+  cursor: pointer;
+  border: none;
   transition: all var(--duration-base) var(--ease-smooth);
-  white-space: nowrap; letter-spacing: 0.01em;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
   position: relative;
   -webkit-tap-highlight-color: transparent;
 }
+
 .btn:disabled {
-  opacity: 0.4; cursor: not-allowed;
-  transform: none !important; filter: none !important;
-  box-shadow: none !important; pointer-events: none;
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  pointer-events: none;
 }
+
 .btn:active:not(:disabled) {
   transform: scale(0.97);
   transition-duration: var(--duration-fast);
@@ -265,6 +311,7 @@ button { font-family: inherit; }
   color: white;
   box-shadow: var(--shadow-brand);
 }
+
 @media (hover: hover) {
   .btn-primary:hover:not(:disabled) {
     box-shadow: var(--shadow-brand-lg);
@@ -278,6 +325,7 @@ button { font-family: inherit; }
   color: var(--color-text-primary);
   border: 1px solid var(--color-border);
 }
+
 @media (hover: hover) {
   .btn-secondary:hover:not(:disabled) {
     border-color: var(--color-border-hover);
@@ -290,9 +338,10 @@ button { font-family: inherit; }
   color: var(--color-text-secondary);
   border: 1px solid transparent;
 }
+
 @media (hover: hover) {
   .btn-ghost:hover:not(:disabled) {
-    background: rgba(255,255,255,0.03);
+    background: rgba(255, 255, 255, 0.03);
     border-color: var(--color-border);
     color: var(--color-text-primary);
   }
@@ -300,9 +349,11 @@ button { font-family: inherit; }
 
 .btn-accent {
   background: linear-gradient(135deg, var(--color-accent), #d97706);
-  color: #000; font-weight: 700;
+  color: #000;
+  font-weight: 700;
   box-shadow: var(--shadow-accent);
 }
+
 @media (hover: hover) {
   .btn-accent:hover:not(:disabled) {
     box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);
@@ -316,6 +367,7 @@ button { font-family: inherit; }
   color: var(--color-error);
   border: 1px solid rgba(239, 68, 68, 0.12);
 }
+
 @media (hover: hover) {
   .btn-danger:hover:not(:disabled) {
     background: rgba(239, 68, 68, 0.15);
@@ -328,6 +380,7 @@ button { font-family: inherit; }
   color: var(--color-success);
   border: 1px solid rgba(34, 197, 94, 0.12);
 }
+
 @media (hover: hover) {
   .btn-success:hover:not(:disabled) {
     background: rgba(34, 197, 94, 0.15);
@@ -335,8 +388,17 @@ button { font-family: inherit; }
   }
 }
 
-.btn-sm { padding: 7px 16px; font-size: var(--text-sm); border-radius: var(--radius-sm); }
-.btn-lg { padding: 14px 30px; font-size: 1rem; border-radius: var(--radius); }
+.btn-sm {
+  padding: 7px 16px;
+  font-size: var(--text-sm);
+  border-radius: var(--radius-sm);
+}
+
+.btn-lg {
+  padding: 14px 30px;
+  font-size: 1rem;
+  border-radius: var(--radius);
+}
 
 /* ─── Inputs ─── 
    RULES:
@@ -345,41 +407,59 @@ button { font-family: inherit; }
    • Border transitions through: subtle → hover → active
    • Placeholder uses ghost-tier text */
 .input {
-  width: 100%; padding: 11px 16px;
+  width: 100%;
+  padding: 11px 16px;
   background: var(--color-surface-1);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   color: var(--color-text-primary);
-  font-size: var(--text-base); font-family: inherit;
+  font-size: var(--text-base);
+  font-family: inherit;
   outline: none;
   transition: border-color var(--duration-base) var(--ease-smooth),
-              box-shadow var(--duration-base) var(--ease-smooth),
-              background var(--duration-base) var(--ease-smooth);
+    box-shadow var(--duration-base) var(--ease-smooth),
+    background var(--duration-base) var(--ease-smooth);
 }
-.input:hover:not(:focus) { border-color: var(--color-border-hover); }
+
+.input:hover:not(:focus) {
+  border-color: var(--color-border-hover);
+}
+
 .input:focus {
   border-color: var(--color-brand);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
   background: var(--color-surface-2);
 }
-.input::placeholder { color: var(--color-text-ghost); }
+
+.input::placeholder {
+  color: var(--color-text-ghost);
+}
+
 .input:disabled {
-  opacity: 0.5; cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
   background: var(--color-surface-0);
 }
 
 select.input {
-  cursor: pointer; appearance: none;
+  cursor: pointer;
+  appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%235e5e78' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 36px;
 }
-textarea.input { resize: vertical; min-height: 88px; line-height: 1.7; }
+
+textarea.input {
+  resize: vertical;
+  min-height: 88px;
+  line-height: 1.7;
+}
 
 .label {
   display: block;
-  font-size: var(--text-sm); font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: 600;
   color: var(--color-text-secondary);
   margin-bottom: var(--space-2);
   letter-spacing: 0.02em;
@@ -387,17 +467,42 @@ textarea.input { resize: vertical; min-height: 88px; line-height: 1.7; }
 
 /* ─── Badge ─── */
 .badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 4px 12px; border-radius: var(--radius-full);
-  font-size: var(--text-xs); font-weight: 700;
-  letter-spacing: 0.04em; text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
-.badge-brand { background: rgba(99, 102, 241, 0.1); color: var(--color-brand-light); }
-.badge-accent { background: rgba(245, 158, 11, 0.1); color: var(--color-accent-light); }
-.badge-success { background: rgba(34, 197, 94, 0.1); color: var(--color-success); }
-.badge-error { background: rgba(239, 68, 68, 0.1); color: var(--color-error); }
-.badge-neutral { background: rgba(156, 163, 175, 0.06); color: var(--color-text-secondary); }
+
+.badge-brand {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--color-brand-light);
+}
+
+.badge-accent {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-accent-light);
+}
+
+.badge-success {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--color-success);
+}
+
+.badge-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-error);
+}
+
+.badge-neutral {
+  background: rgba(156, 163, 175, 0.06);
+  color: var(--color-text-secondary);
+}
 
 /* ─── Alerts ─── */
 .alert-error {
@@ -415,36 +520,46 @@ textarea.input { resize: vertical; min-height: 88px; line-height: 1.7; }
    Performance: uses background-position animation (paint-only, no layout). */
 .skeleton {
   background: linear-gradient(90deg,
-    var(--color-surface-2) 25%, var(--color-surface-3) 50%, var(--color-surface-2) 75%
-  );
+      var(--color-surface-2) 25%, var(--color-surface-3) 50%, var(--color-surface-2) 75%);
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;
   border-radius: var(--radius-lg);
 }
+
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* ─── Modal Overlay ─── 
    RULE: All modals/drawers MUST use this consistent backdrop.
    Entrance: scale-in (spring easing). Close: handled by component. */
 .modal-overlay {
-  position: fixed; inset: 0;
+  position: fixed;
+  inset: 0;
   background: rgba(7, 7, 12, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   z-index: 1000;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: var(--space-5);
   animation: fadeIn var(--duration-base) var(--ease-out);
 }
+
 .modal-panel {
   background: var(--color-surface-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl), var(--shadow-glow);
-  max-height: 90vh; overflow-y: auto;
+  max-height: 90vh;
+  overflow-y: auto;
   animation: scaleIn var(--duration-slow) var(--ease-spring);
 }
 
@@ -458,51 +573,129 @@ textarea.input { resize: vertical; min-height: 88px; line-height: 1.7; }
    • pulse:   status indicator (organic, breathing)
    ═══════════════════════════════════════════════════════════════════ */
 
-.fade-in { animation: fadeIn 0.5s var(--ease-out) both; }
+.fade-in {
+  animation: fadeIn 0.5s var(--ease-out) both;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.slide-up { animation: slideUp 0.45s var(--ease-out) both; }
+.slide-up {
+  animation: slideUp 0.45s var(--ease-out) both;
+}
+
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.scale-in { animation: scaleIn var(--duration-slow) var(--ease-spring) both; }
+.scale-in {
+  animation: scaleIn var(--duration-slow) var(--ease-spring) both;
+}
+
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.92); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.animate-spin { animation: spin 1s linear infinite; }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 .pulse-dot {
-  width: 8px; height: 8px; border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
   background: var(--color-success);
   animation: pulse 2s ease-in-out infinite;
 }
+
 @keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(1.5); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(1.5);
+  }
 }
 
 /* ─── Stagger Helper ─── 
    Apply to children for cascading entrance animations.
    Usage: parent applies --stagger-delay to each child via style. */
-.stagger > * { animation: fadeIn 0.4s var(--ease-out) both; }
-.stagger > *:nth-child(1) { animation-delay: 0s; }
-.stagger > *:nth-child(2) { animation-delay: 0.04s; }
-.stagger > *:nth-child(3) { animation-delay: 0.08s; }
-.stagger > *:nth-child(4) { animation-delay: 0.12s; }
-.stagger > *:nth-child(5) { animation-delay: 0.16s; }
-.stagger > *:nth-child(6) { animation-delay: 0.2s; }
+.stagger>* {
+  animation: fadeIn 0.4s var(--ease-out) both;
+}
+
+.stagger>*:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.stagger>*:nth-child(2) {
+  animation-delay: 0.04s;
+}
+
+.stagger>*:nth-child(3) {
+  animation-delay: 0.08s;
+}
+
+.stagger>*:nth-child(4) {
+  animation-delay: 0.12s;
+}
+
+.stagger>*:nth-child(5) {
+  animation-delay: 0.16s;
+}
+
+.stagger>*:nth-child(6) {
+  animation-delay: 0.2s;
+}
 
 /* ─── Stars ─── */
-.star-filled { color: var(--color-accent); }
-.star-empty { color: var(--color-text-ghost); }
+.star-filled {
+  color: var(--color-accent);
+}
+
+.star-empty {
+  color: var(--color-text-ghost);
+}
 
 /* ═══════════════════════════════════════════════════════════════════
    PAGE LAYOUT
@@ -513,7 +706,9 @@ textarea.input { resize: vertical; min-height: 88px; line-height: 1.7; }
   padding: var(--space-6) var(--space-6) 80px;
 }
 
-.page-header { margin-bottom: var(--space-10); }
+.page-header {
+  margin-bottom: var(--space-10);
+}
 
 .page-title {
   font-size: var(--text-2xl);
@@ -541,22 +736,32 @@ textarea.input { resize: vertical; min-height: 88px; line-height: 1.7; }
   padding: var(--space-16) var(--space-8);
   text-align: center;
 }
+
 .empty-state-icon {
-  width: 72px; height: 72px; margin: 0 auto var(--space-5);
+  width: 72px;
+  height: 72px;
+  margin: 0 auto var(--space-5);
   border-radius: 50%;
   background: var(--color-brand-subtle);
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .empty-state-title {
   color: var(--color-text-secondary);
-  font-weight: 600; font-size: var(--text-md);
+  font-weight: 600;
+  font-size: var(--text-md);
   margin-bottom: var(--space-2);
 }
+
 .empty-state-desc {
   color: var(--color-text-muted);
   font-size: var(--text-base);
   margin-bottom: var(--space-6);
-  max-width: 360px; margin-left: auto; margin-right: auto;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
   line-height: 1.6;
 }
 
@@ -570,24 +775,63 @@ textarea.input { resize: vertical; min-height: 88px; line-height: 1.7; }
    ═══════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 1024px) {
-  .page-container { padding-left: var(--space-5); padding-right: var(--space-5); }
+  .page-container {
+    padding-left: var(--space-5);
+    padding-right: var(--space-5);
+  }
 }
 
 @media (max-width: 768px) {
-  :root { --nav-height: 56px; }
-  body { font-size: 14px; }
-  .page-container { padding: var(--space-4) var(--space-4) 110px; }
-  .page-title { font-size: 1.4rem; }
-  .page-subtitle { font-size: var(--text-base); }
-  .page-header { margin-bottom: var(--space-6); }
-  .btn-lg { padding: 12px 24px; font-size: var(--text-md); }
+  :root {
+    --nav-height: 56px;
+  }
+
+  body {
+    font-size: 14px;
+  }
+
+  .page-container {
+    padding: var(--space-4) var(--space-4) 110px;
+  }
+
+  .page-title {
+    font-size: 1.4rem;
+  }
+
+  .page-subtitle {
+    font-size: var(--text-base);
+  }
+
+  .page-header {
+    margin-bottom: var(--space-6);
+  }
+
+  .btn-lg {
+    padding: 12px 24px;
+    font-size: var(--text-md);
+  }
+
   /* Increase touch targets on mobile */
-  .btn { min-height: 44px; }
-  .btn-sm { min-height: 36px; }
+  .btn {
+    min-height: 44px;
+  }
+
+  .btn-sm {
+    min-height: 36px;
+  }
 }
 
 @media (max-width: 480px) {
-  .page-container { padding-left: var(--space-3); padding-right: var(--space-3); }
-  .page-title { font-size: 1.2rem; }
-  .btn-lg { padding: 11px 20px; }
+  .page-container {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+
+  .page-title {
+    font-size: 1.2rem;
+  }
+
+  .btn-lg {
+    padding: 11px 20px;
+  }
 }

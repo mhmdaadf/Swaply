@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import api from '../lib/api';
 import { Brain, TrendingUp, X, Info, ShieldCheck, AlertTriangle } from 'lucide-react';
 
@@ -40,9 +41,9 @@ export default function WorthCheckModal({ item, onClose }) {
 
   const isAI = result?.method === 'ai';
 
-  return (
-    <div className="wc-overlay fade-in" onClick={onClose}>
-      <div className="wc-modal" onClick={e => e.stopPropagation()}>
+  return createPortal(
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-panel wc-modal" onClick={e => e.stopPropagation()}>
         <button className="wc-close" onClick={onClose} aria-label="Close"><X size={18} /></button>
 
         <div className="wc-header">
@@ -154,18 +155,10 @@ export default function WorthCheckModal({ item, onClose }) {
       </div>
 
       <style>{`
-        .wc-overlay {
-          position: fixed; inset: 0; background: rgba(7,7,12,0.85);
-          backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-          z-index: 1000; display: flex; align-items: center; justify-content: center;
-          padding: var(--space-5);
-        }
+        /* ═══ WorthCheckModal — Enterprise Polish ═══ */
         .wc-modal {
-          background: var(--color-surface-3); border: 1px solid var(--color-border);
-          border-radius: var(--radius-xl); width: 100%; max-width: 480px;
+          width: 100%; max-width: 480px;
           position: relative; padding: var(--space-8);
-          box-shadow: var(--shadow-xl), var(--shadow-glow);
-          max-height: 90vh; overflow-y: auto;
         }
         .wc-close {
           position: absolute; top: 18px; right: 18px; background: var(--color-surface-2);
@@ -174,6 +167,7 @@ export default function WorthCheckModal({ item, onClose }) {
           transition: all var(--duration-base) var(--ease-smooth);
         }
         .wc-close:hover { border-color: var(--color-border-hover); color: var(--color-text-primary); }
+        .wc-close:active { transform: scale(0.95); }
 
         /* Header */
         .wc-header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
@@ -253,6 +247,7 @@ export default function WorthCheckModal({ item, onClose }) {
 
         @keyframes wc-ring { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(2.2); opacity: 0; } }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 }

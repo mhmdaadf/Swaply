@@ -5,7 +5,7 @@ import api from '../lib/api';
 
 export default function ListingWizard({ onClose, onComplete }) {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hi! I'm your Swaply Concierge. 🤖 What would you like to list today? Just give me the name of the item!" }
+    { role: 'assistant', content: "Hi! I'm your Smart AI Assistant. ✨ What would you like to list today? Just tell me the name of the item!" }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -64,7 +64,7 @@ export default function ListingWizard({ onClose, onComplete }) {
               <div className="pulse-ring" />
             </div>
             <div>
-              <h3>Listing Concierge</h3>
+              <h3>Smart AI Lister</h3>
               <p className="status">{loading ? 'AI is thinking...' : 'Online'}</p>
             </div>
           </div>

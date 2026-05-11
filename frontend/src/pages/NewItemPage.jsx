@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../lib/api';
-import { Upload, CheckCircle2, Loader2, Wand2, Image } from 'lucide-react';
+import { Upload, CheckCircle2, Loader2, Wand2, Image, ArrowLeft } from 'lucide-react';
 
 const CATEGORIES = ['Electronics','Books','Clothing','Furniture','Sports','Toys','Music','Art','Tools','Automotive','Collectibles','Other'];
 const CONDITIONS = ['New','Like New','Good','Fair','Poor'];
@@ -50,6 +50,9 @@ export default function NewItemPage() {
 
   return (
     <div className="page-container fade-in" style={{ paddingTop: 'calc(var(--nav-height) + var(--space-8))', maxWidth: 640 }}>
+      <button className="btn btn-ghost btn-sm ni-back-btn" onClick={() => navigate(-1)} style={{ marginBottom: 'var(--space-4)', marginLeft: '-12px' }}>
+        <ArrowLeft size={16} /> Back
+      </button>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
           <h1 className="page-title">List a New Item</h1>

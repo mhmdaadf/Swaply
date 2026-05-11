@@ -57,7 +57,7 @@ export default function Dashboard() {
         </div>
         <div className="dash-actions">
           <button className="btn dash-ai-btn" onClick={() => setShowWizard(true)}>
-            <Wand2 size={15} /> AI Concierge
+            <Wand2 size={15} /> Smart AI List
           </button>
           <Link to="/items/new" className="btn btn-primary">
             <PlusCircle size={15} /> New Listing
