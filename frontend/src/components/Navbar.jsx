@@ -62,7 +62,11 @@ export default function Navbar() {
       </nav>
 
       <style>{`
-        /* ═══ Desktop Nav ═══ */
+        /* ═══ Desktop Nav ═══ 
+           INTERACTION RULES:
+           • Links: color transition only (duration-base / ease-smooth)
+           • Active: brand underline indicator with glow
+           • User pill: border + ring-shadow on hover */
         .nav-desktop {
           position: fixed; top: 0; left: 0; right: 0; z-index: 100;
           border-bottom: 1px solid var(--color-border-subtle);
@@ -77,7 +81,7 @@ export default function Navbar() {
         /* Brand */
         .nav-brand {
           display: flex; align-items: center; gap: var(--space-3);
-          font-size: 1.25rem; font-weight: 800; letter-spacing: -0.035em;
+          font-size: var(--text-xl); font-weight: 800; letter-spacing: -0.035em;
         }
         .nav-brand-icon {
           width: 30px; height: 30px; border-radius: var(--radius-sm);
@@ -88,15 +92,18 @@ export default function Navbar() {
                       inset 0 1px 0 rgba(255,255,255,0.15);
         }
 
-        /* Links */
-        .nav-links { display: flex; gap: 1px; }
+        /* Links — consistent hover/active timing */
+        .nav-links { display: flex; gap: var(--space-1); }
         .nav-link {
-          display: flex; align-items: center; gap: 6px;
-          padding: 7px 14px; border-radius: var(--radius-sm);
-          font-size: 0.82rem; font-weight: 500;
+          display: flex; align-items: center; gap: var(--space-2);
+          padding: var(--space-2) var(--space-4);
+          border-radius: var(--radius-sm);
+          font-size: var(--text-sm); font-weight: 500;
           color: var(--color-text-muted);
-          transition: all var(--duration-base) var(--ease-smooth);
+          transition: color var(--duration-base) var(--ease-smooth),
+                      background var(--duration-base) var(--ease-smooth);
           position: relative;
+          -webkit-tap-highlight-color: transparent;
         }
         .nav-link:hover {
           color: var(--color-text-secondary);
@@ -104,7 +111,7 @@ export default function Navbar() {
         }
         .nav-link.is-active {
           color: var(--color-text-primary);
-          background: rgba(99,102,241,0.06);
+          background: var(--color-brand-subtle);
         }
         .nav-link.is-active::after {
           content: ''; position: absolute;
@@ -114,13 +121,15 @@ export default function Navbar() {
           box-shadow: 0 0 8px rgba(99,102,241,0.4);
         }
 
-        /* User */
+        /* User pill */
         .nav-user {
           display: flex; align-items: center; gap: var(--space-2);
-          padding: 4px 12px 4px 4px; border-radius: var(--radius-full);
+          padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
+          border-radius: var(--radius-full);
           background: var(--color-surface-2);
           border: 1px solid var(--color-border);
-          transition: all var(--duration-base) var(--ease-smooth);
+          transition: border-color var(--duration-base) var(--ease-smooth),
+                      box-shadow var(--duration-base) var(--ease-smooth);
         }
         .nav-user:hover {
           border-color: var(--color-border-hover);
@@ -130,12 +139,15 @@ export default function Navbar() {
           width: 28px; height: 28px; border-radius: 50%;
           background: linear-gradient(135deg, var(--color-brand), var(--color-accent));
           display: flex; align-items: center; justify-content: center;
-          font-size: 0.7rem; font-weight: 700; color: #fff;
+          font-size: var(--text-xs); font-weight: 700; color: #fff;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
         }
-        .nav-user-name { font-size: 0.78rem; font-weight: 500; }
+        .nav-user-name {
+          font-size: var(--text-sm); font-weight: 500;
+          color: var(--color-text-primary);
+        }
         .nav-user-score {
-          font-size: 0.6rem; font-weight: 700;
+          font-size: var(--text-xs); font-weight: 700;
           background: rgba(245,158,11,0.1); color: var(--color-accent-light);
           padding: 2px 7px; border-radius: var(--radius-full);
         }
@@ -143,7 +155,7 @@ export default function Navbar() {
         @media (max-width: 768px) {
           .nav-link-label { display: none; }
           .nav-user { display: none !important; }
-          .nav-link { padding: 8px; }
+          .nav-link { padding: var(--space-2); }
           .nav-container { padding: 0 var(--space-3); }
         }
 
@@ -155,22 +167,28 @@ export default function Navbar() {
           backdrop-filter: blur(24px) saturate(1.5);
           -webkit-backdrop-filter: blur(24px) saturate(1.5);
           border-top: 1px solid var(--color-border-subtle);
-          padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+          padding: var(--space-1) var(--space-1) calc(var(--space-1) + env(safe-area-inset-bottom));
           justify-content: space-around;
         }
         @media (max-width: 768px) { .nav-mobile { display: flex; } }
 
         .nav-mobile-item {
           display: flex; flex-direction: column; align-items: center; gap: 2px;
-          padding: 6px 14px; border-radius: var(--radius);
-          font-size: 0.55rem; font-weight: 600; letter-spacing: 0.03em;
+          padding: var(--space-2) var(--space-4);
+          border-radius: var(--radius);
+          font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.03em;
           color: var(--color-text-ghost);
-          transition: all var(--duration-base) var(--ease-smooth);
+          transition: color var(--duration-base) var(--ease-smooth),
+                      background var(--duration-base) var(--ease-smooth);
           text-decoration: none; min-width: 56px;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .nav-mobile-item:active {
+          background: rgba(255,255,255,0.03);
         }
         .nav-mobile-item.is-active {
           color: var(--color-brand-light);
-          background: rgba(99,102,241,0.06);
+          background: var(--color-brand-subtle);
         }
       `}</style>
     </>

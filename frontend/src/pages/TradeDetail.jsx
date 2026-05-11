@@ -172,6 +172,10 @@ export default function TradeDetail() {
       </div>
 
       <style>{`
+        /* ═══ TradeDetail — Interaction Rules ═══
+           Trade info card: static, no hover (informational)
+           Chat input: standard focus ring
+           Messages: smooth scrolling */
         .td-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); align-items: start; }
 
         .td-info-card { padding: var(--space-6); }
@@ -189,14 +193,14 @@ export default function TradeDetail() {
         }
         .td-info-name { font-size: var(--text-lg); font-weight: 600; }
         .td-info-trust {
-          display: flex; align-items: center; gap: 3px;
+          display: flex; align-items: center; gap: var(--space-1);
           font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: 2px;
         }
 
         .td-items-section { margin-bottom: var(--space-5); }
         .td-items-label {
-          font-size: var(--text-sm); color: var(--color-text-muted); font-weight: 500;
-          margin-bottom: var(--space-3);
+          font-size: var(--text-sm); color: var(--color-text-muted); font-weight: 600;
+          margin-bottom: var(--space-3); text-transform: uppercase; letter-spacing: 0.04em;
         }
         .td-item-row { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
         .td-item-thumb {
@@ -212,11 +216,12 @@ export default function TradeDetail() {
 
         .td-rating-card { padding: var(--space-5); margin-top: var(--space-4); }
         .td-rating-title { font-weight: 600; margin-bottom: var(--space-3); }
-        .td-stars { display: flex; gap: 4px; margin-bottom: var(--space-3); }
-        .td-star-btn { background: none; border: none; cursor: pointer; padding: 2px; }
+        .td-stars { display: flex; gap: var(--space-1); margin-bottom: var(--space-3); }
+        .td-star-btn { background: none; border: none; cursor: pointer; padding: 2px; transition: transform var(--duration-fast); }
+        .td-star-btn:active { transform: scale(0.9); }
 
         /* Chat */
-        .td-chat { display: flex; flex-direction: column; height: 540px; overflow: hidden; }
+        .td-chat { display: flex; flex-direction: column; height: calc(100vh - 280px); min-height: 400px; max-height: 600px; overflow: hidden; }
         .td-chat-header {
           padding: var(--space-4) var(--space-5);
           border-bottom: 1px solid var(--color-border);
@@ -253,7 +258,10 @@ export default function TradeDetail() {
           border-top: 1px solid var(--color-border);
         }
 
-        @media (max-width: 768px) { .td-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+          .td-grid { grid-template-columns: 1fr; }
+          .td-chat { height: 500px; }
+        }
       `}</style>
     </div>
   );

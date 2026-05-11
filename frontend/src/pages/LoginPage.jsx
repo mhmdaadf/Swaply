@@ -51,7 +51,7 @@ export default function LoginPage() {
                 <label className="label" htmlFor="login-password" style={{ marginBottom: 0 }}>Password</label>
                 <Link to="/forgot-password" className="auth-forgot">Forgot?</Link>
               </div>
-              <div className="auth-input-wrap" style={{ marginTop: 8 }}>
+              <div className="auth-input-wrap" style={{ marginTop: 'var(--space-2)' }}>
                 <Lock size={15} className="auth-input-icon" />
                 <input id="login-password" type="password" className="input" placeholder="Enter your password"
                   value={password} onChange={(e) => setPassword(e.target.value)}
@@ -100,10 +100,13 @@ export default function LoginPage() {
           width: 100%; max-width: 420px; position: relative; z-index: 1;
         }
 
-        /* Brand */
+        /* ═══ LoginPage — Interaction Rules ═══
+           Brand icon: inner shadow highlight
+           Inputs: icon transitions color on focus
+           Submit: scale down on active for tactile feedback */
         .auth-brand { text-align: center; margin-bottom: var(--space-10); }
         .auth-brand-icon {
-          width: 48px; height: 48px; border-radius: 14px; margin: 0 auto var(--space-4);
+          width: 48px; height: 48px; border-radius: var(--radius-lg); margin: 0 auto var(--space-4);
           background: linear-gradient(135deg, var(--color-brand), #a78bfa);
           display: flex; align-items: center; justify-content: center; color: #fff;
           box-shadow: 0 6px 24px rgba(99,102,241,0.3), inset 0 1px 0 rgba(255,255,255,0.15);

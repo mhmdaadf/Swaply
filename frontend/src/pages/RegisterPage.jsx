@@ -96,10 +96,14 @@ export default function RegisterPage() {
           background: radial-gradient(circle, rgba(245,158,11,0.05) 0%, transparent 65%);
           pointer-events: none; filter: blur(40px);
         }
+        /* ═══ RegisterPage — Interaction Rules ═══
+           Brand icon: inner shadow highlight
+           Inputs: icon transitions color on focus
+           Submit: scale down on active for tactile feedback */
         .auth-content { width: 100%; max-width: 420px; position: relative; z-index: 1; }
         .auth-brand { text-align: center; margin-bottom: var(--space-10); }
         .auth-brand-icon {
-          width: 48px; height: 48px; border-radius: 14px; margin: 0 auto var(--space-4);
+          width: 48px; height: 48px; border-radius: var(--radius-lg); margin: 0 auto var(--space-4);
           background: linear-gradient(135deg, var(--color-brand), #a78bfa);
           display: flex; align-items: center; justify-content: center; color: #fff;
           box-shadow: 0 6px 24px rgba(99,102,241,0.3), inset 0 1px 0 rgba(255,255,255,0.15);

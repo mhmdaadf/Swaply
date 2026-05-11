@@ -55,48 +55,63 @@ export default function ItemCard({ item, showOwner = true }) {
       {showAI && <WorthCheckModal item={item} onClose={() => setShowAI(false)} />}
 
       <style>{`
-        .ic-card { cursor: pointer; }
+        /* ═══ ItemCard — Interaction Rules ═══
+           Hover: image scale(1.05) + brightness(1.05) — duration-slow
+           Active (card): translateY(-1px) — handled by .card
+           AI button: reveals on hover (opacity + translateY) — duration-base */
+        .ic-card {
+          cursor: pointer;
+          -webkit-tap-highlight-color: transparent;
+        }
         .ic-img {
           height: 200px; overflow: hidden; position: relative;
           background: var(--color-surface-2);
         }
         .ic-img img {
           width: 100%; height: 100%; object-fit: cover;
-          transition: transform 0.6s var(--ease-out), filter 0.6s var(--ease-out);
+          transition: transform var(--duration-slow) var(--ease-out),
+                      filter var(--duration-slow) var(--ease-out);
+          will-change: transform;
         }
         .ic-card:hover .ic-img img {
           transform: scale(1.05);
           filter: brightness(1.05);
         }
 
-        /* Points overlay */
+        /* Points overlay — always visible */
         .ic-pts-overlay {
           position: absolute; top: var(--space-3); right: var(--space-3);
           background: rgba(7,7,12,0.8); backdrop-filter: blur(8px);
-          padding: 4px 10px; border-radius: var(--radius-full);
+          padding: var(--space-1) var(--space-3); border-radius: var(--radius-full);
           font-size: var(--text-xs); font-weight: 700;
           color: var(--color-accent-light);
           border: 1px solid rgba(245,158,11,0.15);
         }
 
-        /* AI Button */
+        /* AI Button — reveals on hover, inverts on own hover */
         .ic-ai-btn {
           position: absolute; bottom: var(--space-3); right: var(--space-3);
           background: rgba(18, 18, 30, 0.85); backdrop-filter: blur(8px);
           border: 1px solid rgba(167,139,250,0.2);
           border-radius: var(--radius-sm);
-          padding: 5px 10px; color: #a78bfa;
-          font-size: 0.62rem; font-weight: 700;
-          display: flex; align-items: center; gap: 5px;
+          padding: var(--space-1) var(--space-3);
+          color: #a78bfa;
+          font-size: var(--text-xs); font-weight: 700;
+          display: flex; align-items: center; gap: var(--space-1);
           cursor: pointer; z-index: 5;
           opacity: 0; transform: translateY(4px);
-          transition: all var(--duration-base) var(--ease-out);
+          transition: opacity var(--duration-base) var(--ease-out),
+                      transform var(--duration-base) var(--ease-out),
+                      background var(--duration-fast) var(--ease-smooth),
+                      color var(--duration-fast) var(--ease-smooth);
+          -webkit-tap-highlight-color: transparent;
         }
         .ic-card:hover .ic-ai-btn { opacity: 1; transform: translateY(0); }
         .ic-ai-btn:hover {
           background: #a78bfa; color: #fff; border-color: #a78bfa;
           box-shadow: 0 4px 16px rgba(167,139,250,0.25);
         }
+        .ic-ai-btn:active { transform: scale(0.95); }
         @media (hover: none) { .ic-ai-btn { opacity: 1; transform: translateY(0); } }
 
         /* Body */
@@ -106,9 +121,9 @@ export default function ItemCard({ item, showOwner = true }) {
           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
           overflow: hidden; margin-bottom: var(--space-3);
         }
-        .ic-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+        .ic-tags { display: flex; gap: var(--space-1); flex-wrap: wrap; }
 
-        /* Owner */
+        /* Owner row */
         .ic-owner {
           display: flex; align-items: center; justify-content: space-between;
           margin-top: var(--space-4); padding-top: var(--space-4);
@@ -119,17 +134,18 @@ export default function ItemCard({ item, showOwner = true }) {
           width: 24px; height: 24px; border-radius: 50%;
           background: linear-gradient(135deg, var(--color-brand), var(--color-accent));
           display: flex; align-items: center; justify-content: center;
-          font-size: 0.6rem; font-weight: 700; color: #fff;
+          font-size: var(--text-xs); font-weight: 700; color: #fff;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
         }
         .ic-owner-name { font-size: var(--text-sm); color: var(--color-text-secondary); }
         .ic-trust {
-          display: flex; align-items: center; gap: 3px;
+          display: flex; align-items: center; gap: var(--space-1);
           font-size: var(--text-sm); color: var(--color-text-secondary); font-weight: 500;
         }
 
         .ic-wants {
           margin-top: var(--space-3);
-          display: flex; align-items: center; gap: 4px;
+          display: flex; align-items: center; gap: var(--space-1);
           font-size: var(--text-sm); color: var(--color-text-ghost);
         }
       `}</style>

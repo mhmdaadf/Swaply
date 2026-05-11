@@ -106,27 +106,31 @@ export default function Dashboard() {
       </div>
 
       <style>{`
+        /* ═══ Dashboard — Interaction Rules ═══
+           Stat cards: translateY(-2px) + border-color shift on hover
+           AI btn: glow box-shadow on hover (not transform)
+           Stat values: colored by CSS custom property per-card */
         .dash-header {
           display: flex; justify-content: space-between; align-items: flex-start;
           flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-10);
         }
         .dash-greeting {
           font-size: var(--text-sm); color: var(--color-text-ghost);
-          font-weight: 500; margin-bottom: var(--space-1);
+          font-weight: 600; margin-bottom: var(--space-1);
           text-transform: uppercase; letter-spacing: 0.08em;
         }
         .dash-actions { display: flex; gap: var(--space-2); align-items: center; }
         .dash-ai-btn {
           background: rgba(167, 139, 250, 0.06); color: #a78bfa;
-          border: 1px solid rgba(167, 139, 250, 0.15);
+          border: 1px solid rgba(167, 139, 250, 0.12);
         }
         .dash-ai-btn:hover {
-          background: rgba(167, 139, 250, 0.12);
-          border-color: rgba(167, 139, 250, 0.25);
-          box-shadow: 0 0 20px rgba(167,139,250,0.1);
+          background: rgba(167, 139, 250, 0.1);
+          border-color: rgba(167, 139, 250, 0.2);
+          box-shadow: 0 0 20px rgba(167,139,250,0.08);
         }
 
-        /* Stats */
+        /* Stats — GPU-safe: only transform + box-shadow + border-color animate */
         .dash-stats {
           display: grid; grid-template-columns: repeat(4, 1fr);
           gap: var(--space-4); margin-bottom: var(--space-12);
@@ -135,7 +139,9 @@ export default function Dashboard() {
           background: var(--color-surface-3); border: 1px solid var(--stat-border);
           border-radius: var(--radius-lg); padding: var(--space-5) var(--space-6);
           display: flex; justify-content: space-between; align-items: flex-start;
-          transition: all var(--duration-base) var(--ease-smooth);
+          transition: transform var(--duration-base) var(--ease-out),
+                      border-color var(--duration-base) var(--ease-smooth),
+                      box-shadow var(--duration-slow) var(--ease-smooth);
           position: relative; overflow: hidden;
         }
         .dash-stat-card::before {
@@ -154,7 +160,7 @@ export default function Dashboard() {
           font-weight: 500; margin-bottom: var(--space-2);
         }
         .dash-stat-value {
-          font-size: 2rem; font-weight: 800; color: var(--stat-color);
+          font-size: var(--text-2xl); font-weight: 800; color: var(--stat-color);
           letter-spacing: -0.03em; line-height: 1;
         }
         .dash-stat-icon {
