@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../lib/api';
 import TrustBadge from '../components/TrustBadge';
-import { User, Mail, Calendar, Package, ArrowRightLeft, Star, Heart, Settings, LogOut, Edit3, Check, X, Loader2 } from 'lucide-react';
+import { User, Mail, Calendar, Package, ArrowRightLeft, Star, Heart, LogOut, Edit3, Check, X, Loader2 } from 'lucide-react';
 
 const CATEGORIES = ['Electronics','Books','Clothing','Furniture','Sports','Toys','Music','Art','Tools','Automotive','Collectibles','Other'];
 
@@ -15,243 +15,222 @@ export default function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  
-  const [form, setForm] = useState({
-    username: '',
-    email: '',
-    wishlistCategories: []
-  });
+  const [form, setForm] = useState({ username: '', email: '', wishlistCategories: [] });
 
   useEffect(() => {
-    if (user) {
-      setForm({
-        username: user.username || '',
-        email: user.email || '',
-        wishlistCategories: user.wishlistCategories || []
-      });
-    }
-    
+    if (user) setForm({ username: user.username||'', email: user.email||'', wishlistCategories: user.wishlistCategories||[] });
     const loadStats = async () => {
       try {
-        const [itemsRes, tradesRes] = await Promise.all([
-          api.get('/items/my'),
-          api.get('/trades'),
-        ]);
-        setStats({
-          items: itemsRes.data.length,
-          trades: tradesRes.data.length,
-        });
-      } catch (err) {
-        console.error('Failed to load stats', err);
-      } finally {
-        setLoading(false);
-      }
+        const [i, t] = await Promise.all([api.get('/items/my'), api.get('/trades')]);
+        setStats({ items: i.data.length, trades: t.data.length });
+      } catch (err) { console.error(err); }
+      finally { setLoading(false); }
     };
     loadStats();
   }, [user]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
+  const handleLogout = () => { logout(); navigate('/login'); };
   const handleToggleCategory = (cat) => {
-    setForm(prev => ({
-      ...prev,
-      wishlistCategories: prev.wishlistCategories.includes(cat)
-        ? prev.wishlistCategories.filter(c => c !== cat)
-        : [...prev.wishlistCategories, cat]
-    }));
+    setForm(prev => ({ ...prev, wishlistCategories: prev.wishlistCategories.includes(cat) ? prev.wishlistCategories.filter(c => c !== cat) : [...prev.wishlistCategories, cat] }));
   };
-
   const handleSave = async () => {
-    setSaving(true);
-    setError('');
-    try {
-      const { data } = await api.patch('/auth/profile', form);
-      setUser(data.user);
-      setEditing(false);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update profile');
-    } finally {
-      setSaving(false);
-    }
+    setSaving(true); setError('');
+    try { const { data } = await api.patch('/auth/profile', form); setUser(data.user); setEditing(false); }
+    catch (err) { setError(err.response?.data?.message || 'Failed to update profile'); }
+    finally { setSaving(false); }
   };
 
   if (!user) return null;
-
-  const joinDate = new Date(user.createdAt).toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
-  });
+  const joinDate = new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="page-container fade-in" style={{ paddingTop: 'calc(var(--nav-height) + 24px)', maxWidth: 800 }}>
-      <div className="page-header" style={{ textAlign: 'center', marginBottom: 40, position: 'relative' }}>
+    <div className="page-container fade-in" style={{ paddingTop: 'calc(var(--nav-height) + var(--space-8))', maxWidth: 800 }}>
+      {/* Header */}
+      <div className="pf-header">
         {!editing && (
-          <button 
-            onClick={() => setEditing(true)}
-            className="btn btn-secondary btn-sm" 
-            style={{ position: 'absolute', top: 0, right: 0 }}
-          >
-            <Edit3 size={14} /> Edit Profile
+          <button onClick={() => setEditing(true)} className="btn btn-ghost btn-sm pf-edit-btn">
+            <Edit3 size={14} /> Edit
           </button>
         )}
-        <div style={{
-          width: 100, height: 100, borderRadius: '50%',
-          background: 'linear-gradient(135deg, var(--color-brand), var(--color-accent))',
-          margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '2.5rem', fontWeight: 800, color: '#fff',
-          boxShadow: '0 0 30px rgba(99, 102, 241, 0.3)',
-        }}>
-          {user.username?.charAt(0).toUpperCase()}
-        </div>
-        <h1 className="page-title" style={{ fontSize: '2.25rem' }}>{user.username}</h1>
+        <div className="pf-avatar">{user.username?.charAt(0).toUpperCase()}</div>
+        <h1 className="page-title" style={{ fontSize: 'var(--text-3xl)' }}>{user.username}</h1>
         <p className="page-subtitle">Member since {joinDate}</p>
       </div>
 
-      {error && <div style={{ padding: '10px 14px', borderRadius: 'var(--radius)', background: 'rgba(239,68,68,0.1)', color: 'var(--color-error)', fontSize: '0.85rem', marginBottom: 24, border: '1px solid rgba(239,68,68,0.2)' }}>{error}</div>}
+      {error && <div className="alert-error">{error}</div>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
-        {/* Account Info */}
-        <div className="card" style={{ padding: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-            <Settings size={18} style={{ color: 'var(--color-brand-light)' }} />
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600 }}>{editing ? 'Edit Account' : 'Account Details'}</h2>
+      <div className="pf-grid">
+        {/* Account */}
+        <div className="card pf-section">
+          <div className="pf-section-header">
+            <User size={16} style={{ color: 'var(--color-brand-light)' }} />
+            <h2>{editing ? 'Edit Account' : 'Account Details'}</h2>
           </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <User size={16} style={{ color: 'var(--color-text-secondary)' }} />
-              </div>
+
+          <div className="pf-fields">
+            <div className="pf-field-row">
+              <div className="pf-field-icon"><User size={15} /></div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Username</p>
-                {editing ? (
-                  <input className="input input-sm" value={form.username} onChange={e => setForm({...form, username: e.target.value})} />
-                ) : (
-                  <p style={{ fontSize: '0.9rem', fontWeight: 500 }}>{user.username}</p>
-                )}
+                <p className="pf-field-label">Username</p>
+                {editing ? <input className="input" value={form.username} onChange={e => setForm({...form, username: e.target.value})} /> : <p className="pf-field-value">{user.username}</p>}
               </div>
             </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Mail size={16} style={{ color: 'var(--color-text-secondary)' }} />
-              </div>
+            <div className="pf-field-row">
+              <div className="pf-field-icon"><Mail size={15} /></div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Email Address</p>
-                {editing ? (
-                  <input className="input input-sm" value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
-                ) : (
-                  <p style={{ fontSize: '0.9rem', fontWeight: 500 }}>{user.email}</p>
-                )}
+                <p className="pf-field-label">Email Address</p>
+                {editing ? <input className="input" value={form.email} onChange={e => setForm({...form, email: e.target.value})} /> : <p className="pf-field-value">{user.email}</p>}
               </div>
             </div>
-
             {!editing && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Calendar size={16} style={{ color: 'var(--color-text-secondary)' }} />
-                </div>
+              <div className="pf-field-row">
+                <div className="pf-field-icon"><Calendar size={15} /></div>
                 <div>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Date Joined</p>
-                  <p style={{ fontSize: '0.9rem', fontWeight: 500 }}>{new Date(user.createdAt).toLocaleDateString()}</p>
+                  <p className="pf-field-label">Date Joined</p>
+                  <p className="pf-field-value">{new Date(user.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>
             )}
           </div>
 
           {editing ? (
-            <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+            <div className="pf-actions">
               <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSave} disabled={saving}>
-                {saving ? <Loader2 size={16} className="animate-spin" /> : <><Check size={16} /> Save</>}
+                {saving ? <Loader2 size={15} className="animate-spin" /> : <><Check size={15} /> Save</>}
               </button>
-              <button className="btn btn-secondary" onClick={() => setEditing(false)} disabled={saving}>
-                <X size={16} /> Cancel
-              </button>
+              <button className="btn btn-ghost" onClick={() => setEditing(false)} disabled={saving}><X size={15} /> Cancel</button>
             </div>
           ) : (
-            <button
-              onClick={handleLogout}
-              className="btn btn-secondary"
-              style={{ width: '100%', marginTop: 24, justifyContent: 'center', color: 'var(--color-error)' }}
-            >
-              <LogOut size={16} /> Log Out
-            </button>
+            <button onClick={handleLogout} className="btn btn-danger pf-logout"><LogOut size={15} /> Log Out</button>
           )}
         </div>
 
-        {/* Reputation & Stats */}
-        <div className="card" style={{ padding: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-            <Star size={18} style={{ color: 'var(--color-accent)' }} />
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Trust & Reputation</h2>
+        {/* Trust & Stats */}
+        <div className="card pf-section">
+          <div className="pf-section-header">
+            <Star size={16} style={{ color: 'var(--color-accent)' }} />
+            <h2>Trust & Reputation</h2>
           </div>
 
-          <div style={{ background: 'rgba(245, 158, 11, 0.05)', padding: 16, borderRadius: 'var(--radius)', marginBottom: 24, border: '1px solid rgba(245, 158, 11, 0.1)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Trust Score</span>
+          <div className="pf-trust-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-3)' }}>
+              <span style={{ fontSize: 'var(--text-base)', fontWeight: 600 }}>Trust Score</span>
               <TrustBadge score={user.trustScore} />
             </div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
+            <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
               Based on {user.totalRatings || 0} community ratings. Maintain a high score by completing fair trades.
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div style={{ padding: 16, background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius)', textAlign: 'center' }}>
-              <Package size={20} style={{ color: 'var(--color-brand-light)', marginBottom: 8, margin: '0 auto' }} />
-              <p style={{ fontSize: '1.25rem', fontWeight: 700 }}>{stats.items}</p>
-              <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Items</p>
+          <div className="pf-stat-grid">
+            <div className="pf-stat">
+              <Package size={18} style={{ color: 'var(--color-brand-light)' }} />
+              <p className="pf-stat-num">{stats.items}</p>
+              <p className="pf-stat-label">Items</p>
             </div>
-            <div style={{ padding: 16, background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius)', textAlign: 'center' }}>
-              <ArrowRightLeft size={20} style={{ color: 'var(--color-accent)', marginBottom: 8, margin: '0 auto' }} />
-              <p style={{ fontSize: '1.25rem', fontWeight: 700 }}>{stats.trades}</p>
-              <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Trades</p>
+            <div className="pf-stat">
+              <ArrowRightLeft size={18} style={{ color: 'var(--color-accent)' }} />
+              <p className="pf-stat-num">{stats.trades}</p>
+              <p className="pf-stat-label">Trades</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Wishlist Categories */}
-      <div className="card" style={{ padding: 24, marginTop: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-          <Heart size={18} style={{ color: '#f472b6' }} />
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Wishlist Categories</h2>
+      {/* Wishlist */}
+      <div className="card pf-section" style={{ marginTop: 'var(--space-6)' }}>
+        <div className="pf-section-header">
+          <Heart size={16} style={{ color: '#f472b6' }} />
+          <h2>Wishlist Categories</h2>
         </div>
-        
         {editing ? (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat}
-                onClick={() => handleToggleCategory(cat)}
-                className={`badge ${form.wishlistCategories.includes(cat) ? 'badge-brand' : 'badge-neutral'}`}
-                style={{ cursor: 'pointer', border: 'none', padding: '6px 14px' }}
-              >
-                {cat}
-              </button>
-            ))}
+          <div className="pf-wish-grid">
+            {CATEGORIES.map(cat => {
+              const active = form.wishlistCategories.includes(cat);
+              return (
+                <button key={cat} onClick={() => handleToggleCategory(cat)}
+                  className={`pf-wish-chip ${active ? 'pf-wish-active' : ''}`}>{cat}</button>
+              );
+            })}
           </div>
         ) : (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-            {user.wishlistCategories?.length > 0 ? (
-              user.wishlistCategories.map((cat, i) => (
-                <span key={i} className="badge badge-brand" style={{ padding: '6px 14px', fontSize: '0.8rem' }}>
-                  {cat}
-                </span>
-              ))
-            ) : (
-              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>No categories selected yet.</p>
-            )}
+          <div className="pf-wish-grid">
+            {user.wishlistCategories?.length > 0 ? user.wishlistCategories.map((cat, i) => (
+              <span key={i} className="badge badge-brand" style={{ padding: '6px 14px', fontSize: 'var(--text-sm)' }}>{cat}</span>
+            )) : <p style={{ fontSize: 'var(--text-base)', color: 'var(--color-text-muted)' }}>No categories selected yet.</p>}
           </div>
         )}
-        
-        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: 16 }}>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-ghost)', marginTop: 'var(--space-5)' }}>
           These categories help our AI Smart Match engine find the best items for you.
         </p>
       </div>
+
+      <style>{`
+        .pf-header { text-align: center; margin-bottom: var(--space-10); position: relative; }
+        .pf-edit-btn { position: absolute; top: 0; right: 0; }
+        .pf-avatar {
+          width: 96px; height: 96px; border-radius: 50%; margin: 0 auto var(--space-5);
+          background: linear-gradient(135deg, var(--color-brand), var(--color-accent));
+          display: flex; align-items: center; justify-content: center;
+          font-size: 2.4rem; font-weight: 800; color: #fff;
+          box-shadow: 0 0 40px rgba(99,102,241,0.2), inset 0 2px 0 rgba(255,255,255,0.15);
+        }
+
+        .pf-grid {
+          display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: var(--space-6);
+        }
+        .pf-section { padding: var(--space-6); }
+        .pf-section-header {
+          display: flex; align-items: center; gap: var(--space-2);
+          margin-bottom: var(--space-6);
+        }
+        .pf-section-header h2 { font-size: var(--text-lg); font-weight: 600; }
+
+        .pf-fields { display: flex; flex-direction: column; gap: var(--space-5); }
+        .pf-field-row { display: flex; align-items: flex-start; gap: var(--space-3); }
+        .pf-field-icon {
+          width: 36px; height: 36px; border-radius: var(--radius-sm); flex-shrink: 0;
+          background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center;
+          color: var(--color-text-secondary);
+        }
+        .pf-field-label { font-size: var(--text-xs); color: var(--color-text-ghost); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+        .pf-field-value { font-size: var(--text-md); font-weight: 500; }
+
+        .pf-actions { display: flex; gap: var(--space-3); margin-top: var(--space-6); }
+        .pf-logout { width: 100%; margin-top: var(--space-6); justify-content: center; }
+
+        .pf-trust-card {
+          background: rgba(245,158,11,0.03); border: 1px solid rgba(245,158,11,0.08);
+          border-radius: var(--radius); padding: var(--space-4) var(--space-5);
+          margin-bottom: var(--space-6);
+        }
+
+        .pf-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+        .pf-stat {
+          padding: var(--space-4); background: rgba(255,255,255,0.02);
+          border-radius: var(--radius); text-align: center;
+        }
+        .pf-stat-num { font-size: var(--text-xl); font-weight: 700; margin-top: var(--space-2); }
+        .pf-stat-label {
+          font-size: var(--text-xs); color: var(--color-text-ghost);
+          text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+        }
+
+        .pf-wish-grid { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+        .pf-wish-chip {
+          padding: 7px 16px; border-radius: var(--radius-full);
+          font-size: var(--text-sm); font-weight: 500; cursor: pointer;
+          background: rgba(255,255,255,0.03); color: var(--color-text-secondary);
+          border: 1px solid var(--color-border);
+          transition: all var(--duration-fast) var(--ease-smooth);
+        }
+        .pf-wish-chip:hover { border-color: var(--color-border-hover); }
+        .pf-wish-active {
+          background: rgba(99,102,241,0.1); color: var(--color-brand-light);
+          border-color: rgba(99,102,241,0.25);
+        }
+      `}</style>
     </div>
   );
 }

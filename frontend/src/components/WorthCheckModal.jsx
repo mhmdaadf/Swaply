@@ -155,23 +155,23 @@ export default function WorthCheckModal({ item, onClose }) {
 
       <style>{`
         .wc-overlay {
-          position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-          backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+          position: fixed; inset: 0; background: rgba(7,7,12,0.85);
+          backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
           z-index: 1000; display: flex; align-items: center; justify-content: center;
-          padding: 20px;
+          padding: var(--space-5);
         }
         .wc-modal {
-          background: var(--color-surface-card); border: 1px solid var(--color-border);
+          background: var(--color-surface-3); border: 1px solid var(--color-border);
           border-radius: var(--radius-xl); width: 100%; max-width: 480px;
-          position: relative; padding: 28px;
-          box-shadow: var(--shadow-lg), var(--shadow-glow);
+          position: relative; padding: var(--space-8);
+          box-shadow: var(--shadow-xl), var(--shadow-glow);
           max-height: 90vh; overflow-y: auto;
         }
         .wc-close {
-          position: absolute; top: 18px; right: 18px; background: var(--color-surface-elevated);
+          position: absolute; top: 18px; right: 18px; background: var(--color-surface-2);
           border: 1px solid var(--color-border); border-radius: var(--radius-sm);
           color: var(--color-text-muted); cursor: pointer; padding: 6px;
-          transition: all 0.2s ease;
+          transition: all var(--duration-base) var(--ease-smooth);
         }
         .wc-close:hover { border-color: var(--color-border-hover); color: var(--color-text-primary); }
 

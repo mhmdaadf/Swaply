@@ -8,10 +8,10 @@ import ListingWizard from '../components/ListingWizard';
 import { Package, ArrowRightLeft, Sparkles, TrendingUp, PlusCircle, Wand2 } from 'lucide-react';
 
 const STAT_CARDS = [
-  { key: 'listings', label: 'My Listings', icon: Package, color: '#818cf8', bg: 'rgba(129,140,248,0.08)' },
-  { key: 'trades', label: 'Active Trades', icon: ArrowRightLeft, color: '#f59e0b', bg: 'rgba(245,158,11,0.08)' },
-  { key: 'matches', label: 'Matches Found', icon: Sparkles, color: '#22c55e', bg: 'rgba(34,197,94,0.08)' },
-  { key: 'trust', label: 'Trust Score', icon: TrendingUp, color: '#f472b6', bg: 'rgba(244,114,182,0.08)' },
+  { key: 'listings', label: 'My Listings', icon: Package, color: '#818cf8', bg: 'rgba(129,140,248,0.06)', border: 'rgba(129,140,248,0.08)' },
+  { key: 'trades', label: 'Active Trades', icon: ArrowRightLeft, color: '#f59e0b', bg: 'rgba(245,158,11,0.06)', border: 'rgba(245,158,11,0.08)' },
+  { key: 'matches', label: 'Matches Found', icon: Sparkles, color: '#22c55e', bg: 'rgba(34,197,94,0.06)', border: 'rgba(34,197,94,0.08)' },
+  { key: 'trust', label: 'Trust Score', icon: TrendingUp, color: '#f472b6', bg: 'rgba(244,114,182,0.06)', border: 'rgba(244,114,182,0.08)' },
 ];
 
 export default function Dashboard() {
@@ -22,34 +22,24 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(false);
 
-  const handleWizardComplete = (recommendation) => {
+  const handleWizardComplete = (rec) => {
     setShowWizard(false);
-    navigate('/items/new', { state: { prefill: recommendation } });
+    navigate('/items/new', { state: { prefill: rec } });
   };
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [itemsRes, tradesRes, matchesRes] = await Promise.all([
-          api.get('/items/my'),
-          api.get('/trades'),
-          api.get('/matches'),
-        ]);
-        setMyItems(itemsRes.data);
-        setStats({
-          trades: tradesRes.data.length,
-          matches: matchesRes.data.length,
-        });
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+        const [i, t, m] = await Promise.all([api.get('/items/my'), api.get('/trades'), api.get('/matches')]);
+        setMyItems(i.data);
+        setStats({ trades: t.data.length, matches: m.data.length });
+      } catch (err) { console.error(err); }
+      finally { setLoading(false); }
     };
     load();
   }, []);
 
-  const statValues = {
+  const vals = {
     listings: myItems.length,
     trades: stats.trades,
     matches: stats.matches,
@@ -57,89 +47,137 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="page-container fade-in" style={{ paddingTop: 'calc(var(--nav-height) + 24px)' }}>
+    <div className="page-container fade-in" style={{ paddingTop: 'calc(var(--nav-height) + var(--space-8))' }}>
       {/* Header */}
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+      <div className="dash-header">
         <div>
-          <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginBottom: 4, fontWeight: 500 }}>Welcome back</p>
+          <p className="dash-greeting">Welcome back</p>
           <h1 className="page-title">{user?.username}</h1>
-          <div style={{ marginTop: 10 }}>
-            <TrustBadge score={user?.trustScore} />
-          </div>
+          <div style={{ marginTop: 'var(--space-3)' }}><TrustBadge score={user?.trustScore} /></div>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button
-            className="btn"
-            style={{
-              background: 'rgba(167, 139, 250, 0.08)',
-              color: '#a78bfa',
-              border: '1px solid rgba(167, 139, 250, 0.2)',
-            }}
-            onClick={() => setShowWizard(true)}
-          >
-            <Wand2 size={16} /> Smart AI List
+        <div className="dash-actions">
+          <button className="btn dash-ai-btn" onClick={() => setShowWizard(true)}>
+            <Wand2 size={15} /> AI Concierge
           </button>
           <Link to="/items/new" className="btn btn-primary">
-            <PlusCircle size={16} /> New Listing
+            <PlusCircle size={15} /> New Listing
           </Link>
         </div>
       </div>
 
-      {showWizard && (
-        <ListingWizard
-          onClose={() => setShowWizard(false)}
-          onComplete={handleWizardComplete}
-        />
-      )}
+      {showWizard && <ListingWizard onClose={() => setShowWizard(false)} onComplete={handleWizardComplete} />}
 
-      {/* Stats */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: 14, marginBottom: 40,
-      }}>
-        {STAT_CARDS.map(({ key, label, icon: Icon, color, bg }) => (
-          <div key={key} className="card" style={{ padding: '20px 22px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-              <div>
-                <p style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}>{label}</p>
-                <p style={{ fontSize: '1.8rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1, color }}>{statValues[key]}</p>
-              </div>
-              <div style={{
-                width: 42, height: 42, borderRadius: 'var(--radius)',
-                background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <Icon size={20} style={{ color }} />
-              </div>
+      {/* Stats Grid */}
+      <div className="dash-stats">
+        {STAT_CARDS.map(({ key, label, icon: Icon, color, bg, border }) => (
+          <div key={key} className="dash-stat-card" style={{ '--stat-color': color, '--stat-bg': bg, '--stat-border': border }}>
+            <div className="dash-stat-info">
+              <p className="dash-stat-label">{label}</p>
+              <p className="dash-stat-value">{vals[key]}</p>
+            </div>
+            <div className="dash-stat-icon">
+              <Icon size={20} />
             </div>
           </div>
         ))}
       </div>
 
-      {/* My Items */}
+      {/* My Listings */}
       <div>
-        <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: 20, letterSpacing: '-0.01em' }}>My Listings</h2>
+        <h2 className="section-title">My Listings</h2>
         {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
-            {[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: 300 }} />)}
+          <div className="dash-grid">
+            {[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: 320 }} />)}
           </div>
         ) : myItems.length === 0 ? (
-          <div className="card" style={{ padding: '48px 32px', textAlign: 'center' }}>
-            <div style={{
-              width: 64, height: 64, margin: '0 auto 16px', borderRadius: '50%',
-              background: 'rgba(99,102,241,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
+          <div className="card empty-state">
+            <div className="empty-state-icon">
               <Package size={28} style={{ color: 'var(--color-text-muted)' }} />
             </div>
-            <p style={{ color: 'var(--color-text-secondary)', fontWeight: 600, marginBottom: 6 }}>No listings yet</p>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: 20 }}>List your first item to start swapping</p>
+            <p className="empty-state-title">No listings yet</p>
+            <p className="empty-state-desc">List your first item to start swapping with the community</p>
             <Link to="/items/new" className="btn btn-primary">List Your First Item</Link>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
+          <div className="dash-grid">
             {myItems.map(item => <ItemCard key={item._id} item={item} showOwner={false} />)}
           </div>
         )}
       </div>
+
+      <style>{`
+        .dash-header {
+          display: flex; justify-content: space-between; align-items: flex-start;
+          flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-10);
+        }
+        .dash-greeting {
+          font-size: var(--text-sm); color: var(--color-text-ghost);
+          font-weight: 500; margin-bottom: var(--space-1);
+          text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .dash-actions { display: flex; gap: var(--space-2); align-items: center; }
+        .dash-ai-btn {
+          background: rgba(167, 139, 250, 0.06); color: #a78bfa;
+          border: 1px solid rgba(167, 139, 250, 0.15);
+        }
+        .dash-ai-btn:hover {
+          background: rgba(167, 139, 250, 0.12);
+          border-color: rgba(167, 139, 250, 0.25);
+          box-shadow: 0 0 20px rgba(167,139,250,0.1);
+        }
+
+        /* Stats */
+        .dash-stats {
+          display: grid; grid-template-columns: repeat(4, 1fr);
+          gap: var(--space-4); margin-bottom: var(--space-12);
+        }
+        .dash-stat-card {
+          background: var(--color-surface-3); border: 1px solid var(--stat-border);
+          border-radius: var(--radius-lg); padding: var(--space-5) var(--space-6);
+          display: flex; justify-content: space-between; align-items: flex-start;
+          transition: all var(--duration-base) var(--ease-smooth);
+          position: relative; overflow: hidden;
+        }
+        .dash-stat-card::before {
+          content: ''; position: absolute; inset: 0;
+          background: radial-gradient(circle at top right, var(--stat-bg) 0%, transparent 60%);
+          pointer-events: none;
+        }
+        .dash-stat-card:hover {
+          border-color: var(--stat-color);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+          transform: translateY(-2px);
+        }
+        .dash-stat-info { position: relative; z-index: 1; }
+        .dash-stat-label {
+          font-size: var(--text-sm); color: var(--color-text-muted);
+          font-weight: 500; margin-bottom: var(--space-2);
+        }
+        .dash-stat-value {
+          font-size: 2rem; font-weight: 800; color: var(--stat-color);
+          letter-spacing: -0.03em; line-height: 1;
+        }
+        .dash-stat-icon {
+          width: 44px; height: 44px; border-radius: var(--radius);
+          background: var(--stat-bg); color: var(--stat-color);
+          display: flex; align-items: center; justify-content: center;
+          position: relative; z-index: 1;
+        }
+
+        .dash-grid {
+          display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: var(--space-5);
+        }
+
+        @media (max-width: 1024px) {
+          .dash-stats { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+          .dash-stats { grid-template-columns: 1fr; }
+          .dash-actions { width: 100%; }
+          .dash-actions .btn { flex: 1; justify-content: center; }
+        }
+      `}</style>
     </div>
   );
 }

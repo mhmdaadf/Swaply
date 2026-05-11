@@ -298,7 +298,7 @@ export default function EstimatorPage() {
   };
 
   return (
-    <div className="page-container fade-in" style={{ paddingTop: 84, maxWidth: 640 }}>
+    <div className="page-container fade-in" style={{ paddingTop: 'calc(var(--nav-height) + var(--space-8))', maxWidth: 640 }}>
       {/* Header */}
       <div className="page-header" style={{ textAlign: 'center' }}>
         <div className="ai-page-badge">
@@ -632,7 +632,7 @@ export default function EstimatorPage() {
           transform: translateY(-1px);
         }
         .btn-ai-submit:disabled {
-          background: var(--color-surface-elevated);
+          background: var(--color-surface-2);
           box-shadow: none; color: var(--color-text-muted);
         }
 

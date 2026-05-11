@@ -326,15 +326,15 @@ export default function MatchesPage() {
 
         /* Match card */
         .match-card {
-          background: var(--color-surface-card); border: 1px solid var(--color-border);
-          border-radius: var(--radius-lg); padding: 26px;
+          background: var(--color-surface-3); border: 1px solid var(--color-border);
+          border-radius: var(--radius-lg); padding: var(--space-6);
           position: relative; overflow: hidden;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all var(--duration-base) var(--ease-smooth);
         }
         .match-card:hover {
           border-color: var(--color-border-hover);
-          box-shadow: 0 8px 32px rgba(99,102,241,0.06);
-          transform: translateY(-2px);
+          box-shadow: var(--shadow-card-hover);
+          transform: translateY(-3px);
         }
         .match-card-ai { border-color: rgba(99,102,241,0.15); }
         .match-card-ai:hover { border-color: rgba(99,102,241,0.3); box-shadow: 0 8px 32px rgba(99,102,241,0.12); }
@@ -387,7 +387,7 @@ export default function MatchesPage() {
         .match-score-badge {
           display: inline-flex; align-items: center; gap: 3px;
           font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 14px;
-          background: var(--color-surface-elevated); color: var(--color-text-secondary);
+          background: var(--color-surface-2); color: var(--color-text-secondary);
           border: 1px solid var(--color-border);
         }
         .match-score-ai {
@@ -410,7 +410,7 @@ export default function MatchesPage() {
         .match-item-row { display: flex; align-items: center; gap: 12px; }
         .match-item-thumb {
           width: 48px; height: 48px; border-radius: var(--radius);
-          background: var(--color-surface-elevated); overflow: hidden;
+          background: var(--color-surface-2); overflow: hidden;
           border: 1px solid var(--color-border); flex-shrink: 0;
         }
         .match-item-thumb img { width: 100%; height: 100%; object-fit: cover; }

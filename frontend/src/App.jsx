@@ -24,13 +24,14 @@ const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 function PageLoader() {
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      minHeight: '60vh',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      minHeight: '60vh', gap: 16,
     }}>
       <div style={{
-        width: 40, height: 40, border: '3px solid var(--color-border)',
+        width: 36, height: 36, border: '2.5px solid var(--color-border)',
         borderTopColor: 'var(--color-brand-light)', borderRadius: '50%',
       }} className="animate-spin" />
+      <span style={{ fontSize: '0.75rem', color: 'var(--color-text-ghost)', fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Loading</span>
     </div>
   );
 }

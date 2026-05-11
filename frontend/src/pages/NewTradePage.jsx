@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
-import { Loader2, ArrowRightLeft } from 'lucide-react';
+import { Loader2, ArrowRightLeft, Check } from 'lucide-react';
 
 export default function NewTradePage() {
   const [params] = useSearchParams();
@@ -33,37 +33,73 @@ export default function NewTradePage() {
     } catch (err) { setError(err.response?.data?.message || 'Failed to create trade'); setSubmitting(false); }
   };
 
-  if (loading) return <div className="page-container" style={{ paddingTop:84 }}><div className="skeleton" style={{ height:300 }} /></div>;
+  if (loading) return <div className="page-container" style={{ paddingTop: 'calc(var(--nav-height) + var(--space-8))' }}><div className="skeleton" style={{ height: 300 }} /></div>;
 
   return (
-    <div className="page-container fade-in" style={{ paddingTop:'calc(var(--nav-height) + 24px)', maxWidth:640 }}>
+    <div className="page-container fade-in" style={{ paddingTop: 'calc(var(--nav-height) + var(--space-8))', maxWidth: 640 }}>
       <div className="page-header">
         <h1 className="page-title">Propose a Trade</h1>
         <p className="page-subtitle">Select items you want to offer</p>
       </div>
-      {error && <div style={{ padding:'10px 14px', borderRadius:'var(--radius)', background:'rgba(239,68,68,0.1)', color:'var(--color-error)', fontSize:'0.85rem', marginBottom:20, border:'1px solid rgba(239,68,68,0.2)' }}>{error}</div>}
-      <div className="card" style={{ padding:24, marginBottom:20 }}>
-        <p style={{ fontSize:'0.8rem', color:'var(--color-text-muted)', marginBottom:12 }}>Your items to offer:</p>
-        {myItems.length === 0 ? <p style={{ color:'var(--color-text-secondary)', fontSize:'0.9rem' }}>No available items to offer</p> : (
-          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-            {myItems.map(item => (
-              <label key={item._id} className="card" style={{ padding:12, display:'flex', alignItems:'center', gap:12, cursor:'pointer', borderColor: selectedOffered.includes(item._id) ? 'var(--color-brand)' : undefined }}>
-                <input type="checkbox" checked={selectedOffered.includes(item._id)} onChange={() => toggleOffered(item._id)} />
-                <div style={{ width:40, height:40, borderRadius:'var(--radius)', background:'var(--color-surface-elevated)', overflow:'hidden', border:'1px solid var(--color-border)', flexShrink:0 }}>
-                  <img src={item.images?.[0] || 'https://via.placeholder.com/40'} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-                </div>
-                <div style={{ flex:1 }}>
-                  <p style={{ fontWeight:500, fontSize:'0.9rem' }}>{item.title}</p>
-                  <p style={{ fontSize:'0.75rem', color:'var(--color-text-muted)' }}>{item.category} — {item.swapPointValue} pts</p>
-                </div>
-              </label>
-            ))}
+
+      {error && <div className="alert-error">{error}</div>}
+
+      <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-5)' }}>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-4)', fontWeight: 500 }}>Your items to offer:</p>
+        {myItems.length === 0 ? (
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-md)' }}>No available items to offer</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+            {myItems.map(item => {
+              const selected = selectedOffered.includes(item._id);
+              return (
+                <label key={item._id} className="nt-item-row" style={{ borderColor: selected ? 'var(--color-brand)' : undefined, background: selected ? 'rgba(99,102,241,0.03)' : undefined }}>
+                  <div className={`nt-check ${selected ? 'nt-check-active' : ''}`}>
+                    {selected && <Check size={12} />}
+                  </div>
+                  <input type="checkbox" checked={selected} onChange={() => toggleOffered(item._id)} style={{ display: 'none' }} />
+                  <div className="nt-item-thumb">
+                    <img src={item.images?.[0] || 'https://via.placeholder.com/40'} alt="" />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontWeight: 500, fontSize: 'var(--text-md)' }}>{item.title}</p>
+                    <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>{item.category} · {item.swapPointValue} pts</p>
+                  </div>
+                </label>
+              );
+            })}
           </div>
         )}
       </div>
-      <button className="btn btn-accent btn-lg" style={{ width:'100%' }} disabled={submitting || !selectedOffered.length} onClick={handleSubmit}>
+
+      <button className="btn btn-accent btn-lg" style={{ width: '100%' }} disabled={submitting || !selectedOffered.length} onClick={handleSubmit}>
         {submitting ? <Loader2 size={18} className="animate-spin" /> : <><ArrowRightLeft size={18} /> Send Trade Proposal</>}
       </button>
+
+      <style>{`
+        .nt-item-row {
+          display: flex; align-items: center; gap: var(--space-3); cursor: pointer;
+          padding: var(--space-3) var(--space-4); border-radius: var(--radius);
+          border: 1px solid var(--color-border);
+          transition: all var(--duration-base) var(--ease-smooth);
+        }
+        .nt-item-row:hover { border-color: var(--color-border-hover); }
+        .nt-check {
+          width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+          border: 2px solid var(--color-border-hover);
+          display: flex; align-items: center; justify-content: center;
+          transition: all var(--duration-fast) var(--ease-smooth);
+        }
+        .nt-check-active {
+          background: var(--color-brand); border-color: var(--color-brand); color: #fff;
+        }
+        .nt-item-thumb {
+          width: 40px; height: 40px; border-radius: var(--radius-sm);
+          background: var(--color-surface-2); overflow: hidden;
+          border: 1px solid var(--color-border-subtle); flex-shrink: 0;
+        }
+        .nt-item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+      `}</style>
     </div>
   );
 }
