@@ -1,0 +1,12 @@
+{
+  "name": "swaply-monorepo",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "npm start --prefix backend",
+    "build": "echo 'No root build needed'",
+    "install": "npm install --prefix backend"
+  }
+}
