@@ -1,11 +1,11 @@
 
-[2026-05-06T01:32:35.055Z] 
-TO: alice@test.com
-SUBJECT: Swaply Password Reset
+[2026-05-10T13:20:55.554Z] 
+TO: dave@test.com
+SUBJECT: Swaply: new proposal
 BODY: 
-You requested a password reset. Please click the link below to set a new password:
+Hi dave,
 
-http://localhost:5173/reset-password/17b2d0839cf9c3e2da8fd7b479e5d89cb8c74ae8
+aliceff proposed a new trade with you!
 
-If you did not request this, please ignore this email.
+Log in to see the details.
 ------------------------------------------------------------

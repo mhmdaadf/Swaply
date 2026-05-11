@@ -1,49 +1,130 @@
 /**
- * AI Value Estimator
+ * AI Value Estimator v2 — Real AI-Powered Valuation
  *
- * Calculates a "Swap Point" value using category-specific depreciation,
- * condition multipliers, and age-based decay.
+ * When an AI key is present (Groq / OpenAI):
+ *   1. Computes a heuristic baseline (depreciation formula)
+ *   2. Sends full item context + baseline to the LLM
+ *   3. LLM returns swap-point value, reasoning, AND a confidence score
+ *   4. AI value is used directly (clamped for safety) — NOT overridden by heuristic
+ *
+ * Fallback (no key): heuristic formula + SmartDemo template reasoning
  */
 
+const { chatCompletion, SmartDemo, hasKey } = require('./aiClient');
+
+// ---------- Depreciation tables (used for baseline & fallback) ----------
+
 const CATEGORY_DEPRECIATION = {
-  Electronics: 0.25,
-  Books: 0.10,
-  Clothing: 0.20,
-  Furniture: 0.08,
-  Sports: 0.15,
-  Toys: 0.18,
-  Music: 0.12,
-  Art: 0.05,
-  Tools: 0.10,
-  Automotive: 0.12,
-  Collectibles: 0.03,
-  Other: 0.15,
+  Electronics: 0.25, Books: 0.10, Clothing: 0.20, Furniture: 0.08, Sports: 0.15,
+  Toys: 0.18, Music: 0.12, Art: 0.05, Tools: 0.10, Automotive: 0.12,
+  Collectibles: 0.03, Other: 0.15,
 };
 
 const CONDITION_MULTIPLIER = {
-  'New': 1.0,
-  'Like New': 0.85,
-  'Good': 0.65,
-  'Fair': 0.45,
-  'Poor': 0.25,
+  'New': 1.0, 'Like New': 0.85, 'Good': 0.65, 'Fair': 0.45, 'Poor': 0.25,
 };
 
-function estimateValue({ category, originalPrice, condition, ageMonths }) {
+function heuristicEstimate({ category, originalPrice, condition, ageMonths }) {
   if (!originalPrice || originalPrice <= 0) return 0;
-
   const depreciationRate = CATEGORY_DEPRECIATION[category] || 0.15;
   const conditionMult = CONDITION_MULTIPLIER[condition] || 0.5;
   const years = (ageMonths || 0) / 12;
-
-  // Exponential decay: value = price * condition * e^(-rate * years)
   const ageFactor = Math.exp(-depreciationRate * years);
   let value = originalPrice * conditionMult * ageFactor;
-
-  // Floor at 5% of original price, cap at 10000
   value = Math.max(value, originalPrice * 0.05);
   value = Math.min(value, 10000);
-
   return Math.round(value);
 }
 
-module.exports = { estimateValue, CATEGORY_DEPRECIATION, CONDITION_MULTIPLIER };
+// ---------- AI prompt engineering ----------
+
+const SYSTEM_PROMPT = `You are a professional item valuation expert for Swaply, a barter trading platform.
+Your job is to estimate the fair swap value of items in "Swap Points" (1 point ≈ $1 USD).
+
+Consider ALL of the following when estimating:
+- Original retail price and current market resale value
+- Item condition and age-based depreciation
+- Brand reputation and demand in the secondhand market
+- Category-specific value retention (e.g. collectibles hold value better than electronics)
+- The description details (accessories included, cosmetic damage, completeness)
+
+You will receive a heuristic baseline computed from a depreciation formula. Your job is to IMPROVE on this baseline using your knowledge of real-world market values.
+
+Respond ONLY with valid JSON — no markdown, no backticks, no explanation outside JSON:
+{"swapPoints": <integer>, "confidence": <0.0-1.0>, "reasoning": "<2-3 sentences explaining your valuation>"}`;
+
+function buildUserPrompt({ title, description, category, originalPrice, condition, ageMonths, heuristicBaseline }) {
+  return [
+    `Item: ${title || 'Unknown Item'}`,
+    `Category: ${category}`,
+    `Condition: ${condition}`,
+    `Original Price: $${originalPrice}`,
+    `Age: ${ageMonths || 0} months`,
+    `Description: ${description || 'No description provided'}`,
+    ``,
+    `Heuristic Baseline: ${heuristicBaseline} Swap Points`,
+    `(Use this baseline as a reference, but override it if your market knowledge suggests a different value.)`,
+  ].join('\n');
+}
+
+// ---------- Main estimation function ----------
+
+async function estimateValue({ category, originalPrice, condition, ageMonths, title, description }) {
+  const baseline = heuristicEstimate({ category, originalPrice, condition, ageMonths });
+
+  if (!originalPrice || originalPrice <= 0) {
+    return { swapPointValue: 0, reasoning: null, method: 'heuristic', confidence: null };
+  }
+
+  if (hasKey()) {
+    try {
+      const userPrompt = buildUserPrompt({
+        title, description, category, originalPrice, condition, ageMonths,
+        heuristicBaseline: baseline,
+      });
+
+      const reply = await chatCompletion(SYSTEM_PROMPT, userPrompt, {
+        cacheKey: `v:${title}:${category}:${condition}:${originalPrice}:${ageMonths}`,
+      });
+
+      if (reply) {
+        const jsonMatch = reply.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          let aiValue = parseInt(parsed.swapPoints, 10);
+          const confidence = parseFloat(parsed.confidence) || 0.7;
+
+          // Validate AI value is reasonable
+          if (!isNaN(aiValue) && aiValue > 0) {
+            // Safety clamp: AI can deviate up to ±4x from baseline
+            const lowerBound = Math.max(1, Math.round(baseline * 0.25));
+            const upperBound = Math.round(baseline * 4);
+            aiValue = Math.max(lowerBound, Math.min(upperBound, aiValue));
+            aiValue = Math.min(aiValue, 10000);
+
+            return {
+              swapPointValue: aiValue,
+              reasoning: parsed.reasoning || null,
+              method: 'ai',
+              confidence: Math.max(0, Math.min(1, confidence)),
+              baseline, // expose baseline so frontend can show "AI adjusted from X to Y"
+            };
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[ValueEstimator] AI Error:', err.message);
+    }
+  }
+
+  // Smart Demo Fallback
+  return {
+    swapPointValue: baseline,
+    reasoning: SmartDemo.generateReasoning({ title: title || category, category, condition, originalPrice }),
+    method: hasKey() ? 'ai-fallback' : 'demo',
+    confidence: null,
+    baseline,
+  };
+}
+
+module.exports = { estimateValue, estimateValueSync: heuristicEstimate };

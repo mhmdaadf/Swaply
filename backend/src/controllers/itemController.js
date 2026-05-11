@@ -1,5 +1,5 @@
 const Item = require('../models/Item');
-const { estimateValue } = require('../services/valueEstimator');
+const { estimateValue, estimateValueSync } = require('../services/valueEstimator');
 
 // Parse desiredItems from multipart form data (may arrive as JSON string or comma-separated)
 function parseDesiredItems(raw) {
@@ -16,7 +16,9 @@ exports.createItem = async (req, res, next) => {
   try {
     const { title, description, category, condition, originalPrice, ageMonths, desiredItems } = req.body;
 
-    const swapPointValue = estimateValue({ category, originalPrice, condition, ageMonths });
+    // Use AI-powered estimation with full item context
+    const estimation = await estimateValue({ category, originalPrice, condition, ageMonths, title, description });
+    const swapPointValue = estimation.swapPointValue;
 
     const item = await Item.create({
       title,
@@ -105,7 +107,8 @@ exports.updateItem = async (req, res, next) => {
 
     const updates = req.body;
     if (updates.originalPrice || updates.condition || updates.category || updates.ageMonths) {
-      updates.swapPointValue = estimateValue({
+      // Use sync heuristic for quick edits to avoid API latency
+      updates.swapPointValue = estimateValueSync({
         category: updates.category || item.category,
         originalPrice: updates.originalPrice || item.originalPrice,
         condition: updates.condition || item.condition,
@@ -139,8 +142,18 @@ exports.deleteItem = async (req, res, next) => {
   }
 };
 
-exports.estimateItemValue = async (req, res) => {
-  const { category, originalPrice, condition, ageMonths } = req.body;
-  const value = estimateValue({ category, originalPrice, condition, ageMonths });
-  res.json({ swapPointValue: value });
+exports.estimateItemValue = async (req, res, next) => {
+  try {
+    const { category, originalPrice, condition, ageMonths, title, description } = req.body;
+    const estimation = await estimateValue({ category, originalPrice, condition, ageMonths, title, description });
+    res.json({
+      swapPointValue: estimation.swapPointValue,
+      reasoning: estimation.reasoning,
+      method: estimation.method,
+      confidence: estimation.confidence ?? null,
+      baseline: estimation.baseline ?? null,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
