@@ -5,7 +5,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "https://swaply-backend.onrender.com/api/:splat"
+  to = "https://swaply-api.onrender.com/api/:splat"
   status = 200
   force = true
 

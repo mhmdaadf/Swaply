@@ -6,6 +6,8 @@ const path = require('path');
 const { Server } = require('socket.io');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
+const morgan = require('morgan');
+const helmet = require('helmet');
 
 const authRoutes = require('./routes/auth');
 const itemRoutes = require('./routes/items');
@@ -24,6 +26,13 @@ const io = new Server(server, {
   },
 });
 app.set('io', io);
+
+// Security & Logging
+app.use(helmet({
+  crossOriginResourcePolicy: false, // Allow local images to be served
+}));
+app.use(morgan('combined'));
+app.set('trust proxy', 1); // For Render load balancer
 
 // Middleware
 app.use(cors({
@@ -46,7 +55,12 @@ app.use('/api/matches', matchRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
+  });
 });
 
 // Error handler
