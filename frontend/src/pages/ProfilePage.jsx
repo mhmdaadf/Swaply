@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../lib/api';
 import TrustBadge from '../components/TrustBadge';
-import { User, Mail, Calendar, Package, ArrowRightLeft, Star, Heart, LogOut, Edit3, Check, X, Loader2 } from 'lucide-react';
+import { User, Mail, Calendar, Package, ArrowRightLeft, Star, Heart, LogOut, Edit3, Check, X, Loader2, Shield } from 'lucide-react';
 
 const CATEGORIES = ['Electronics','Books','Clothing','Furniture','Sports','Toys','Music','Art','Tools','Automotive','Collectibles','Other'];
 
@@ -52,7 +52,13 @@ export default function ProfilePage() {
             <Edit3 size={14} /> Edit
           </button>
         )}
-        <div className="pf-avatar">{user.username?.charAt(0).toUpperCase()}</div>
+        <div className="pf-avatar">
+          {user.profilePic ? (
+            <img src={user.profilePic} alt={user.username} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+          ) : (
+            user.username?.charAt(0).toUpperCase()
+          )}
+        </div>
         <h1 className="page-title" style={{ fontSize: 'var(--text-3xl)' }}>{user.username}</h1>
         <p className="page-subtitle">Member since {joinDate}</p>
       </div>
@@ -82,6 +88,21 @@ export default function ProfilePage() {
                 {editing ? <input className="input" value={form.email} onChange={e => setForm({...form, email: e.target.value})} /> : <p className="pf-field-value">{user.email}</p>}
               </div>
             </div>
+            {!editing && (
+              <div className="pf-field-row">
+                <div className="pf-field-icon"><Shield size={15} /></div>
+                <div style={{ flex: 1 }}>
+                  <p className="pf-field-label">Authentication</p>
+                  <p className="pf-field-value">
+                    {user.authType === 'google' || user.googleId ? (
+                      <span style={{ color: 'var(--color-brand-light)', fontWeight: 600 }}>Google Connected</span>
+                    ) : (
+                      'Password Protected'
+                    )}
+                  </p>
+                </div>
+              </div>
+            )}
             {!editing && (
               <div className="pf-field-row">
                 <div className="pf-field-icon"><Calendar size={15} /></div>

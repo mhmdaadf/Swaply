@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { ArrowRightLeft, Mail, Lock, User, Loader2, ArrowRight } from 'lucide-react';
+import GoogleAuth from '../components/GoogleAuth';
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -71,7 +72,9 @@ export default function RegisterPage() {
 
           <div className="auth-divider"><span>or</span></div>
 
-          <p className="auth-switch">
+          <GoogleAuth />
+
+          <p className="auth-switch" style={{ marginTop: 'var(--space-6)' }}>
             Already have an account?{' '}
             <Link to="/login">Sign in</Link>
           </p>

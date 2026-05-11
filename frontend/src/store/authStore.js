@@ -50,6 +50,24 @@ export const useAuthStore = create(
         }
       },
 
+      googleLogin: async (idToken) => {
+        set({ loading: true, error: null });
+        try {
+          const { data } = await api.post('/auth/google-login', { idToken });
+          set({
+            user: data.user,
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
+            loading: false,
+          });
+          return data;
+        } catch (err) {
+          const msg = err.response?.data?.message || 'Google Login failed';
+          set({ loading: false, error: msg });
+          throw new Error(msg);
+        }
+      },
+
       fetchMe: async () => {
         try {
           const { data } = await api.get('/auth/me');

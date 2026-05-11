@@ -4,6 +4,7 @@ import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 import TrustBadge from '../components/TrustBadge';
 import { Tag, ArrowRight, Calendar, DollarSign, Sparkles, ArrowRightLeft } from 'lucide-react';
+import { getImageUrl } from '../lib/utils';
 
 export default function ItemDetail() {
   const { id } = useParams();
@@ -27,7 +28,7 @@ export default function ItemDetail() {
       <div className="id-grid">
         {/* Image */}
         <div className="id-image-wrap">
-          <img src={item.images?.[0] || placeholder} alt={item.title} loading="lazy" />
+          <img src={getImageUrl(item.images?.[0]) || placeholder} alt={item.title} loading="lazy" />
         </div>
 
         {/* Details */}

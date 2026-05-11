@@ -24,7 +24,7 @@ exports.createItem = async (req, res, next) => {
     const item = await Item.create({
       title,
       description,
-      images: req.files ? req.files.map(f => `/uploads/${f.filename}`) : [],
+      images: req.files ? req.files.map(f => f.path) : [],
       category,
       condition,
       originalPrice,

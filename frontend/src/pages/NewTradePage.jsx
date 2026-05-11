@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { Loader2, ArrowRightLeft, Check } from 'lucide-react';
+import { getImageUrl } from '../lib/utils';
 
 export default function NewTradePage() {
   const [params] = useSearchParams();
@@ -59,7 +60,7 @@ export default function NewTradePage() {
                   </div>
                   <input type="checkbox" checked={selected} onChange={() => toggleOffered(item._id)} style={{ display: 'none' }} />
                   <div className="nt-item-thumb">
-                    <img src={item.images?.[0] || 'https://via.placeholder.com/40'} alt="" />
+                    <img src={getImageUrl(item.images?.[0]) || 'https://via.placeholder.com/40'} alt="" />
                   </div>
                   <div style={{ flex: 1 }}>
                     <p style={{ fontWeight: 500, fontSize: 'var(--text-md)' }}>{item.title}</p>

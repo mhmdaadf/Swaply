@@ -53,14 +53,14 @@ async function seed() {
     for (let i = 0; i < itemTemplates.length; i++) {
       const template = itemTemplates[i];
       const owner = createdUsers[i % createdUsers.length];
-      const swapPointValue = estimateValue(template);
+      const estimation = await estimateValue(template);
 
       await Item.create({
         ...template,
-        swapPointValue,
+        swapPointValue: estimation.swapPointValue,
         owner: owner._id,
       });
-      console.log(`  Created item: ${template.title} (${swapPointValue} pts) -> ${owner.username}`);
+      console.log(`  Created item: ${template.title} (${estimation.swapPointValue} pts) -> ${owner.username}`);
     }
 
     console.log('\nSeed completed successfully.');

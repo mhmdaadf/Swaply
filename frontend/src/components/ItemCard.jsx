@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Tag, Star, ArrowRight, Brain } from 'lucide-react';
 import WorthCheckModal from './WorthCheckModal';
+import { getImageUrl } from '../lib/utils';
 
 export default function ItemCard({ item, showOwner = true }) {
   const [showAI, setShowAI] = useState(false);
@@ -15,7 +16,7 @@ export default function ItemCard({ item, showOwner = true }) {
       <Link to={`/items/${item._id}`} className="card ic-card fade-in" style={{ display: 'block', overflow: 'hidden' }}>
         {/* Image */}
         <div className="ic-img">
-          <img src={item.images?.[0] || placeholder} alt={item.title} loading="lazy" />
+          <img src={getImageUrl(item.images?.[0]) || placeholder} alt={item.title} loading="lazy" />
           <button onClick={e => { e.preventDefault(); e.stopPropagation(); setShowAI(true); }}
             className="ic-ai-btn" title="Verify with AI" aria-label={`Worth check for ${item.title}`}>
             <Brain size={12} /> Worth Check

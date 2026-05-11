@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 import { Send, Star, CheckCircle, XCircle, ArrowRightLeft } from 'lucide-react';
+import { getImageUrl } from '../lib/utils';
 
 export default function TradeDetail() {
   const { id } = useParams();
@@ -58,7 +59,7 @@ export default function TradeDetail() {
   const ItemRow = ({ item }) => (
     <div className="td-item-row">
       <div className="td-item-thumb">
-        <img src={item.images?.[0] || 'https://via.placeholder.com/40'} alt="" />
+        <img src={getImageUrl(item.images?.[0]) || 'https://via.placeholder.com/40'} alt="" />
       </div>
       <div>
         <p className="td-item-title">{item.title}</p>

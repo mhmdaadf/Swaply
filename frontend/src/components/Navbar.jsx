@@ -12,7 +12,9 @@ const NAV_ITEMS = [
 export default function Navbar() {
   const { user } = useAuthStore();
   const location = useLocation();
-  if (!user) return null;
+
+  // On public pages (Landing, Login, Register), we show a specific public navbar if not logged in
+  const isPublicPage = ['/', '/login', '/register', '/forgot-password', '/reset-password'].includes(location.pathname);
 
   return (
     <>
@@ -23,43 +25,64 @@ export default function Navbar() {
             <span className="gradient-text">Swaply</span>
           </Link>
 
-          <div className="nav-links">
-            {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
-              const active = location.pathname.startsWith(path);
-              return (
-                <Link key={path} to={path} aria-current={active ? 'page' : undefined}
-                  className={`nav-link ${active ? 'is-active' : ''}`}>
-                  <Icon size={15} strokeWidth={active ? 2.2 : 1.8} />
-                  <span className="nav-link-label">{label}</span>
-                </Link>
-              );
-            })}
-          </div>
+          {user ? (
+            <>
+              <div className="nav-links">
+                {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
+                  const active = location.pathname.startsWith(path);
+                  return (
+                    <Link key={path} to={path} aria-current={active ? 'page' : undefined}
+                      className={`nav-link ${active ? 'is-active' : ''}`}>
+                      <Icon size={15} strokeWidth={active ? 2.2 : 1.8} />
+                      <span className="nav-link-label">{label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
 
-          <Link to="/profile" className="nav-user" aria-label={`Profile: ${user.username}`}>
-            <div className="nav-user-avatar">{user.username?.charAt(0).toUpperCase()}</div>
-            <span className="nav-user-name">{user.username}</span>
-            <span className="nav-user-score">{user.trustScore?.toFixed(1)}</span>
-          </Link>
+              <Link to="/profile" className="nav-user" aria-label={`Profile: ${user.username}`}>
+                <div className="nav-user-avatar">
+                  {user.profilePic ? (
+                    <img src={user.profilePic} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    user.username?.charAt(0).toUpperCase()
+                  )}
+                </div>
+                <span className="nav-user-name">{user.username}</span>
+                <span className="nav-user-score">{user.trustScore?.toFixed(1)}</span>
+              </Link>
+            </>
+          ) : (
+            <div className="nav-guest-actions">
+              <Link to="/login" className="btn btn-ghost btn-sm">Login</Link>
+              <Link to="/register" className="btn btn-primary btn-sm">Get Started</Link>
+            </div>
+          )}
         </div>
       </nav>
 
-      <nav className="nav-mobile" role="navigation" aria-label="Mobile navigation">
-        {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
-          const active = location.pathname.startsWith(path);
-          return (
-            <Link key={path} to={path} aria-current={active ? 'page' : undefined}
-              className={`nav-mobile-item ${active ? 'is-active' : ''}`}>
-              <Icon size={19} strokeWidth={active ? 2.2 : 1.6} />
-              <span>{label}</span>
-            </Link>
-          );
-        })}
-        <Link to="/profile" className={`nav-mobile-item ${location.pathname === '/profile' ? 'is-active' : ''}`}>
-          <User size={19} strokeWidth={location.pathname === '/profile' ? 2.2 : 1.6} />
-          <span>Profile</span>
-        </Link>
-      </nav>
+      {user && (
+        <nav className="nav-mobile" role="navigation" aria-label="Mobile navigation">
+          {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
+            const active = location.pathname.startsWith(path);
+            return (
+              <Link key={path} to={path} aria-current={active ? 'page' : undefined}
+                className={`nav-mobile-item ${active ? 'is-active' : ''}`}>
+                <Icon size={19} strokeWidth={active ? 2.2 : 1.6} />
+                <span>{label}</span>
+              </Link>
+            );
+          })}
+          <Link to="/profile" className={`nav-mobile-item ${location.pathname === '/profile' ? 'is-active' : ''}`}>
+            {user.profilePic ? (
+              <img src={user.profilePic} alt="" style={{ width: 19, height: 19, borderRadius: '50%', objectFit: 'cover' }} />
+            ) : (
+              <User size={19} strokeWidth={location.pathname === '/profile' ? 2.2 : 1.6} />
+            )}
+            <span>Profile</span>
+          </Link>
+        </nav>
+      )}
 
       <style>{`
         /* ═══ Desktop Nav ═══ 
@@ -150,6 +173,10 @@ export default function Navbar() {
           font-size: var(--text-xs); font-weight: 700;
           background: rgba(245,158,11,0.1); color: var(--color-accent-light);
           padding: 2px 7px; border-radius: var(--radius-full);
+        }
+
+        .nav-guest-actions {
+          display: flex; gap: var(--space-3);
         }
 
         @media (max-width: 768px) {

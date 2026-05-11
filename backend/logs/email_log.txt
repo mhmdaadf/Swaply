@@ -20,3 +20,58 @@ aliceff proposed a new trade with you!
 
 Log in to see the details.
 ------------------------------------------------------------
+
+[2026-05-11T10:51:44.635Z] 
+TO: dave@test.com
+SUBJECT: Swaply: new proposal
+BODY: 
+Hi dave,
+
+aliceff proposed a new trade with you!
+
+Log in to see the details.
+------------------------------------------------------------
+
+[2026-05-11T11:15:15.467Z] 
+TO: bob@test.com
+SUBJECT: Swaply: new proposal
+BODY: 
+Hi bob,
+
+aliceff proposed a new trade with you!
+
+Log in to see the details.
+------------------------------------------------------------
+
+[2026-05-11T11:15:47.023Z] 
+TO: bob@test.com
+SUBJECT: Swaply: new proposal
+BODY: 
+Hi bob,
+
+aliceff proposed a new trade with you!
+
+Log in to see the details.
+------------------------------------------------------------
+
+[2026-05-11T11:38:30.574Z] 
+TO: carol@test.com
+SUBJECT: Swaply: new proposal
+BODY: 
+Hi carol,
+
+aliceff proposed a new trade with you!
+
+Log in to see the details.
+------------------------------------------------------------
+
+[2026-05-11T11:39:17.135Z] 
+TO: bob@test.com
+SUBJECT: Swaply: new proposal
+BODY: 
+Hi bob,
+
+aliceff proposed a new trade with you!
+
+Log in to see the details.
+------------------------------------------------------------

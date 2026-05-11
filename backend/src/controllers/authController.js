@@ -1,7 +1,10 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const emailService = require('../services/emailService');
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const generateTokens = (userId) => {
   const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -58,6 +61,54 @@ exports.login = async (req, res, next) => {
     res.json({ user, ...tokens });
   } catch (err) {
     next(err);
+  }
+};
+
+exports.googleLogin = async (req, res, next) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) return res.status(400).json({ message: 'Google ID Token is required' });
+
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const { sub: googleId, email, name, picture } = ticket.getPayload();
+
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // User exists with this email. Link account if not already linked.
+      if (!user.googleId) {
+        user.googleId = googleId;
+        // Keep authType as 'local' if they signed up locally, but allow google login
+        // Actually, let's mark it as linked
+        if (picture && !user.profilePic) user.profilePic = picture;
+        await user.save();
+      } else if (user.googleId !== googleId) {
+        return res.status(400).json({ message: 'Google account mismatch' });
+      }
+    } else {
+      // Create new user
+      let username = name.replace(/\s+/g, '').toLowerCase().substring(0, 20);
+      const exists = await User.findOne({ username });
+      if (exists) username = `${username}${Math.floor(Math.random() * 1000)}`;
+
+      user = await User.create({
+        username,
+        email,
+        googleId,
+        authType: 'google',
+        profilePic: picture,
+      });
+      await emailService.sendWelcomeEmail(user);
+    }
+
+    const tokens = generateTokens(user._id);
+    res.json({ user, ...tokens });
+  } catch (err) {
+    console.error('Google Auth Error:', err);
+    res.status(401).json({ message: 'Invalid Google token' });
   }
 };
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { ArrowRightLeft, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import GoogleAuth from '../components/GoogleAuth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -66,7 +67,9 @@ export default function LoginPage() {
 
           <div className="auth-divider"><span>or</span></div>
 
-          <p className="auth-switch">
+          <GoogleAuth />
+
+          <p className="auth-switch" style={{ marginTop: 'var(--space-6)' }}>
             New to Swaply?{' '}
             <Link to="/register">Create an account</Link>
           </p>
