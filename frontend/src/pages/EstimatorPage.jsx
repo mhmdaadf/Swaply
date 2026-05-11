@@ -294,9 +294,9 @@ export default function EstimatorPage() {
         </div>
         <h1 className="page-title">
           <Sparkles size={24} style={{ display: 'inline', marginRight: 8, color: 'var(--color-brand-light)' }} />
-          Value Estimator
+          Worth Check
         </h1>
-        <p className="page-subtitle">Real-time AI valuation powered by Groq LPU inference</p>
+        <p className="page-subtitle">AI-powered item valuation & market analysis</p>
       </div>
 
       {/* Form Card */}
