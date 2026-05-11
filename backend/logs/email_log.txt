@@ -75,3 +75,12 @@ aliceff proposed a new trade with you!
 
 Log in to see the details.
 ------------------------------------------------------------
+
+[2026-05-11T23:56:25.339Z] 
+TO: mohamad.a.alkhatib@gmail.com
+SUBJECT: Welcome to Swaply!
+BODY: 
+Hi mohammad,
+
+Welcome to Swaply! Your account is ready. Start listing items and find your first smart match today.
+------------------------------------------------------------
