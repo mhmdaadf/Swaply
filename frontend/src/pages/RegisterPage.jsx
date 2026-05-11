@@ -16,64 +16,60 @@ export default function RegisterPage() {
       await register({ username, email, password });
       navigate('/dashboard');
     } catch (err) {
-      // Error is already handled by useAuthStore and displayed in the UI
       console.error('Registration error:', err);
     }
   };
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: 20,
-      background: 'radial-gradient(ellipse at top, rgba(99,102,241,0.08) 0%, transparent 60%)',
-    }}>
-      <div className="fade-in" style={{ width: '100%', maxWidth: 420 }}>
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 8 }}>
-            <ArrowRightLeft size={28} style={{ color: 'var(--color-brand-light)' }} />
-            <span className="gradient-text" style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Swaply</span>
+    <div className="auth-page">
+      <div className="auth-glow" />
+      <div className="fade-in" style={{ width: '100%', maxWidth: 440, position: 'relative', zIndex: 1 }}>
+        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 10 }}>
+            <div style={{
+              width: 40, height: 40, borderRadius: 12,
+              background: 'linear-gradient(135deg, var(--color-brand), #a78bfa)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 16px rgba(99,102,241,0.3)',
+            }}>
+              <ArrowRightLeft size={20} color="#fff" />
+            </div>
+            <span className="gradient-text" style={{ fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.04em' }}>Swaply</span>
           </div>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Create your account</p>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.92rem' }}>Create your account</p>
         </div>
 
-        <div className="card" style={{ padding: 32 }}>
+        <div className="card" style={{ padding: '36px 32px' }}>
           <form onSubmit={handleSubmit}>
-            {error && (
-              <div style={{
-                padding: '10px 14px', borderRadius: 'var(--radius)',
-                background: 'rgba(239,68,68,0.1)', color: 'var(--color-error)',
-                fontSize: '0.85rem', marginBottom: 20,
-                border: '1px solid rgba(239,68,68,0.2)',
-              }}>{error}</div>
-            )}
+            {error && <div className="alert-error">{error}</div>}
 
-            <div style={{ marginBottom: 18 }}>
-              <label className="label">Username</label>
+            <div style={{ marginBottom: 20 }}>
+              <label className="label" htmlFor="reg-username">Username</label>
               <div style={{ position: 'relative' }}>
-                <User size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
-                <input type="text" className="input" placeholder="Choose a username"
+                <User size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
+                <input id="reg-username" type="text" className="input" placeholder="Choose a username"
                   value={username} onChange={(e) => setUsername(e.target.value)}
-                  required minLength={3} style={{ paddingLeft: 38 }} />
+                  required minLength={3} style={{ paddingLeft: 42 }} />
               </div>
             </div>
 
-            <div style={{ marginBottom: 18 }}>
-              <label className="label">Email</label>
+            <div style={{ marginBottom: 20 }}>
+              <label className="label" htmlFor="reg-email">Email</label>
               <div style={{ position: 'relative' }}>
-                <Mail size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
-                <input type="email" className="input" placeholder="you@example.com"
+                <Mail size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
+                <input id="reg-email" type="email" className="input" placeholder="you@example.com"
                   value={email} onChange={(e) => setEmail(e.target.value)}
-                  required style={{ paddingLeft: 38 }} />
+                  required style={{ paddingLeft: 42 }} />
               </div>
             </div>
 
-            <div style={{ marginBottom: 24 }}>
-              <label className="label">Password</label>
+            <div style={{ marginBottom: 28 }}>
+              <label className="label" htmlFor="reg-password">Password</label>
               <div style={{ position: 'relative' }}>
-                <Lock size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
-                <input type="password" className="input" placeholder="Min 6 characters"
+                <Lock size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
+                <input id="reg-password" type="password" className="input" placeholder="Min 6 characters"
                   value={password} onChange={(e) => setPassword(e.target.value)}
-                  required minLength={6} style={{ paddingLeft: 38 }} />
+                  required minLength={6} style={{ paddingLeft: 42 }} />
               </div>
             </div>
 
@@ -83,12 +79,26 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <p style={{ textAlign: 'center', marginTop: 20, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+          <p style={{ textAlign: 'center', marginTop: 24, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
             Already have an account?{' '}
-            <Link to="/login" style={{ color: 'var(--color-brand-light)', fontWeight: 500 }}>Sign in</Link>
+            <Link to="/login" style={{ color: 'var(--color-brand-light)', fontWeight: 600 }}>Sign in</Link>
           </p>
         </div>
       </div>
+
+      <style>{`
+        .auth-page {
+          min-height: 100vh; display: flex; align-items: center; justify-content: center;
+          padding: 24px; position: relative; overflow: hidden;
+          background: var(--color-surface);
+        }
+        .auth-glow {
+          position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+          width: 600px; height: 600px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
+          pointer-events: none;
+        }
+      `}</style>
     </div>
   );
 }

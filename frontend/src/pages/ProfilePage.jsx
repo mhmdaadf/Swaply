@@ -86,7 +86,7 @@ export default function ProfilePage() {
   });
 
   return (
-    <div className="page-container fade-in" style={{ paddingTop: 84, maxWidth: 800 }}>
+    <div className="page-container fade-in" style={{ paddingTop: 'calc(var(--nav-height) + 24px)', maxWidth: 800 }}>
       <div className="page-header" style={{ textAlign: 'center', marginBottom: 40, position: 'relative' }}>
         {!editing && (
           <button 

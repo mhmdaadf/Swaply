@@ -23,7 +23,7 @@ export default function ItemDetail() {
   const placeholder = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" fill="%231e1e27"><rect width="600" height="400"/><text x="50%" y="50%" fill="%234b5563" font-size="20" text-anchor="middle" dy=".3em" font-family="system-ui">No Image</text></svg>');
 
   return (
-    <div className="page-container fade-in" style={{ paddingTop:84 }}>
+    <div className="page-container fade-in" style={{ paddingTop: 'calc(var(--nav-height) + 24px)' }}>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:32 }} className="item-detail-grid">
         <div style={{ borderRadius:'var(--radius-lg)', overflow:'hidden', background:'var(--color-surface-elevated)', aspectRatio:'4/3' }}>
           <img src={item.images?.[0] || placeholder} alt={item.title} loading="lazy" style={{ width:'100%', height:'100%', objectFit:'cover' }} />

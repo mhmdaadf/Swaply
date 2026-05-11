@@ -21,25 +21,18 @@ export default function Navbar() {
   return (
     <>
       {/* ─── Desktop Top Bar ─── */}
-      <nav className="glass desktop-nav" role="navigation" aria-label="Main navigation" style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-        borderBottom: '1px solid var(--color-border)',
-      }}>
-        <div style={{
-          maxWidth: 1200, margin: '0 auto', padding: '0 20px',
-          height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        }}>
+      <nav className="glass desktop-nav" role="navigation" aria-label="Main navigation">
+        <div className="nav-inner">
           {/* Logo */}
-          <Link to="/" aria-label="Swaply Home" style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.03em',
-          }}>
-            <ArrowRightLeft size={22} style={{ color: 'var(--color-brand-light)' }} />
+          <Link to="/" aria-label="Swaply Home" className="nav-logo">
+            <div className="nav-logo-icon">
+              <ArrowRightLeft size={18} />
+            </div>
             <span className="gradient-text">Swaply</span>
           </Link>
 
           {/* Nav Links */}
-          <div style={{ display: 'flex', gap: 4 }}>
+          <div className="nav-links">
             {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
               const active = location.pathname.startsWith(path);
               return (
@@ -47,14 +40,7 @@ export default function Navbar() {
                   key={path}
                   to={path}
                   aria-current={active ? 'page' : undefined}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 6,
-                    padding: '8px 14px', borderRadius: 'var(--radius)',
-                    fontSize: '0.825rem', fontWeight: 500,
-                    color: active ? 'var(--color-brand-light)' : 'var(--color-text-secondary)',
-                    background: active ? 'rgba(99,102,241,0.1)' : 'transparent',
-                    transition: 'all 0.2s ease',
-                  }}
+                  className={`nav-link ${active ? 'nav-link-active' : ''}`}
                 >
                   <Icon size={16} />
                   <span className="nav-label">{label}</span>
@@ -64,22 +50,15 @@ export default function Navbar() {
           </div>
 
           {/* User Profile */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Link to="/profile" className="user-profile-link" aria-label={`Profile: ${user.username}`} style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '6px 12px', borderRadius: 'var(--radius)',
-              background: 'var(--color-surface-elevated)',
-              border: '1px solid var(--color-border)',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}>
-              <User size={14} style={{ color: 'var(--color-brand-light)' }} />
-              <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>{user.username}</span>
-              <span className="badge badge-accent" style={{ fontSize: '0.65rem' }}>
-                {user.trustScore?.toFixed(1)}
-              </span>
-            </Link>
-          </div>
+          <Link to="/profile" className="nav-profile" aria-label={`Profile: ${user.username}`}>
+            <div className="nav-avatar">
+              {user.username?.charAt(0).toUpperCase()}
+            </div>
+            <span className="nav-username">{user.username}</span>
+            <span className="badge badge-accent" style={{ fontSize: '0.62rem', padding: '2px 8px' }}>
+              {user.trustScore?.toFixed(1)}
+            </span>
+          </Link>
         </div>
       </nav>
 
@@ -110,39 +89,108 @@ export default function Navbar() {
       </nav>
 
       <style>{`
-        @media (max-width: 768px) {
-          .nav-label { display: none; }
-          .desktop-nav .user-profile-link { display: none !important; }
+        .desktop-nav {
+          position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+          border-bottom: 1px solid var(--color-border);
         }
-        .user-profile-link:hover {
-          border-color: var(--color-brand-light) !important;
-          background: rgba(99,102,241,0.05) !important;
+        .nav-inner {
+          max-width: var(--max-width); margin: 0 auto; padding: 0 24px;
+          height: var(--nav-height); display: flex; align-items: center;
+          justify-content: space-between;
         }
 
-        /* Mobile bottom nav */
+        /* Logo */
+        .nav-logo {
+          display: flex; align-items: center; gap: 10px;
+          font-size: 1.3rem; font-weight: 800; letter-spacing: -0.03em;
+        }
+        .nav-logo-icon {
+          width: 32px; height: 32px; border-radius: 10px;
+          background: linear-gradient(135deg, var(--color-brand), #a78bfa);
+          display: flex; align-items: center; justify-content: center;
+          color: white; box-shadow: 0 2px 10px rgba(99,102,241,0.3);
+        }
+
+        /* Links */
+        .nav-links { display: flex; gap: 2px; }
+        .nav-link {
+          display: flex; align-items: center; gap: 7px;
+          padding: 8px 16px; border-radius: var(--radius);
+          font-size: 0.84rem; font-weight: 500;
+          color: var(--color-text-muted);
+          transition: all 0.2s ease;
+          position: relative;
+        }
+        .nav-link:hover {
+          color: var(--color-text-secondary);
+          background: rgba(255,255,255,0.03);
+        }
+        .nav-link-active {
+          color: var(--color-brand-light) !important;
+          background: rgba(99,102,241,0.08) !important;
+        }
+        .nav-link-active::after {
+          content: ''; position: absolute; bottom: -1px;
+          left: 50%; transform: translateX(-50%);
+          width: 20px; height: 2px; border-radius: 2px;
+          background: var(--color-brand-light);
+        }
+
+        /* Profile */
+        .nav-profile {
+          display: flex; align-items: center; gap: 10px;
+          padding: 5px 14px 5px 5px; border-radius: 100px;
+          background: var(--color-surface-elevated);
+          border: 1px solid var(--color-border);
+          transition: all 0.2s ease;
+        }
+        .nav-profile:hover {
+          border-color: var(--color-border-active);
+          background: rgba(99,102,241,0.04);
+        }
+        .nav-avatar {
+          width: 30px; height: 30px; border-radius: 50%;
+          background: linear-gradient(135deg, var(--color-brand), var(--color-accent));
+          display: flex; align-items: center; justify-content: center;
+          font-size: 0.75rem; font-weight: 700; color: #fff;
+        }
+        .nav-username {
+          font-size: 0.82rem; font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+          .nav-label { display: none; }
+          .nav-profile { display: none !important; }
+          .nav-links { gap: 0; }
+          .nav-link { padding: 8px 10px; }
+        }
+
+        /* ─── Mobile bottom nav ─── */
         .mobile-nav {
           display: none;
           position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
-          background: rgba(15, 15, 20, 0.95);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
+          background: rgba(10, 10, 16, 0.96);
+          backdrop-filter: blur(20px) saturate(1.4);
+          -webkit-backdrop-filter: blur(20px) saturate(1.4);
           border-top: 1px solid var(--color-border);
-          padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+          padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
           justify-content: space-around;
         }
         @media (max-width: 768px) {
           .mobile-nav { display: flex; }
         }
         .mobile-nav-item {
-          display: flex; flex-direction: column; align-items: center; gap: 2px;
-          padding: 6px 10px; border-radius: 10px;
-          font-size: 0.6rem; font-weight: 500;
+          display: flex; flex-direction: column; align-items: center; gap: 3px;
+          padding: 6px 12px; border-radius: 12px;
+          font-size: 0.58rem; font-weight: 600; letter-spacing: 0.02em;
           color: var(--color-text-muted);
-          transition: color 0.2s ease;
+          transition: all 0.2s ease;
           text-decoration: none;
         }
         .mobile-nav-item.active {
           color: var(--color-brand-light);
+          background: rgba(99,102,241,0.08);
         }
       `}</style>
     </>

@@ -59,8 +59,8 @@ export default function TradeDetail() {
   const canChat = trade.status !== 'completed' && trade.status !== 'cancelled';
 
   return (
-    <div className="page-container fade-in" style={{ paddingTop: 84 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+    <div className="page-container fade-in" style={{ paddingTop: 'calc(var(--nav-height) + 24px)' }}>
+      <div className="trade-detail-grid">
         {/* Left: Trade Info */}
         <div>
           <div className="card" style={{ padding: 20, marginBottom: 16 }}>
@@ -162,6 +162,15 @@ export default function TradeDetail() {
           )}
         </div>
       </div>
+
+      <style>{`
+        .trade-detail-grid {
+          display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+        }
+        @media (max-width: 768px) {
+          .trade-detail-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
     </div>
   );
 }

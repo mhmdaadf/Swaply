@@ -60,7 +60,7 @@ export default function NewItemPage() {
   };
 
   return (
-    <div className="page-container fade-in" style={{ paddingTop:84, maxWidth:640 }}>
+    <div className="page-container fade-in" style={{ paddingTop:'calc(var(--nav-height) + 24px)', maxWidth:640 }}>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
           <h1 className="page-title">List a New Item</h1>

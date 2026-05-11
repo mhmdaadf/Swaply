@@ -36,7 +36,7 @@ export default function NewTradePage() {
   if (loading) return <div className="page-container" style={{ paddingTop:84 }}><div className="skeleton" style={{ height:300 }} /></div>;
 
   return (
-    <div className="page-container fade-in" style={{ paddingTop:84, maxWidth:640 }}>
+    <div className="page-container fade-in" style={{ paddingTop:'calc(var(--nav-height) + 24px)', maxWidth:640 }}>
       <div className="page-header">
         <h1 className="page-title">Propose a Trade</h1>
         <p className="page-subtitle">Select items you want to offer</p>

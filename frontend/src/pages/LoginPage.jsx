@@ -20,61 +20,61 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: 20,
-      background: 'radial-gradient(ellipse at top, rgba(99,102,241,0.08) 0%, transparent 60%)',
-    }}>
-      <div className="fade-in" style={{ width: '100%', maxWidth: 420 }}>
+    <div className="auth-page">
+      <div className="auth-glow" />
+      <div className="fade-in" style={{ width: '100%', maxWidth: 440, position: 'relative', zIndex: 1 }}>
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 8 }}>
-            <ArrowRightLeft size={28} style={{ color: 'var(--color-brand-light)' }} />
-            <span className="gradient-text" style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Swaply</span>
+        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 10 }}>
+            <div style={{
+              width: 40, height: 40, borderRadius: 12,
+              background: 'linear-gradient(135deg, var(--color-brand), #a78bfa)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 16px rgba(99,102,241,0.3)',
+            }}>
+              <ArrowRightLeft size={20} color="#fff" />
+            </div>
+            <span className="gradient-text" style={{ fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.04em' }}>Swaply</span>
           </div>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.92rem' }}>
             Sign in to start trading
           </p>
         </div>
 
-        {/* Form */}
-        <div className="card" style={{ padding: 32 }}>
+        {/* Form Card */}
+        <div className="card" style={{ padding: '36px 32px' }}>
           <form onSubmit={handleSubmit}>
-            {error && (
-              <div style={{
-                padding: '10px 14px', borderRadius: 'var(--radius)',
-                background: 'rgba(239,68,68,0.1)', color: 'var(--color-error)',
-                fontSize: '0.85rem', marginBottom: 20,
-                border: '1px solid rgba(239,68,68,0.2)',
-              }}>
-                {error}
-              </div>
-            )}
+            {error && <div className="alert-error">{error}</div>}
 
-            <div style={{ marginBottom: 18 }}>
-              <label className="label">Email</label>
+            <div style={{ marginBottom: 20 }}>
+              <label className="label" htmlFor="login-email">Email</label>
               <div style={{ position: 'relative' }}>
-                <Mail size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
+                <Mail size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
                 <input
+                  id="login-email"
                   type="email" className="input" placeholder="you@example.com"
                   value={email} onChange={(e) => setEmail(e.target.value)}
-                  required style={{ paddingLeft: 38 }}
+                  required style={{ paddingLeft: 42 }}
                 />
               </div>
             </div>
 
-            <div style={{ marginBottom: 24 }}>
-              <label className="label">Password</label>
+            <div style={{ marginBottom: 28 }}>
+              <label className="label" htmlFor="login-password">Password</label>
               <div style={{ position: 'relative' }}>
-                <Lock size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
+                <Lock size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
                 <input
+                  id="login-password"
                   type="password" className="input" placeholder="Enter your password"
                   value={password} onChange={(e) => setPassword(e.target.value)}
-                  required style={{ paddingLeft: 38 }}
+                  required style={{ paddingLeft: 42 }}
                 />
               </div>
-              <div style={{ textAlign: 'right', marginTop: 8 }}>
-                <Link to="/forgot-password" style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textDecoration: 'none' }}>Forgot password?</Link>
+              <div style={{ textAlign: 'right', marginTop: 10 }}>
+                <Link to="/forgot-password" style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', transition: 'color 0.2s' }}
+                  onMouseOver={e => e.target.style.color = 'var(--color-brand-light)'}
+                  onMouseOut={e => e.target.style.color = 'var(--color-text-muted)'}
+                >Forgot password?</Link>
               </div>
             </div>
 
@@ -84,21 +84,35 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p style={{ textAlign: 'center', marginTop: 20, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+          <p style={{ textAlign: 'center', marginTop: 24, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
             Don't have an account?{' '}
-            <Link to="/register" style={{ color: 'var(--color-brand-light)', fontWeight: 500 }}>Sign up</Link>
+            <Link to="/register" style={{ color: 'var(--color-brand-light)', fontWeight: 600 }}>Sign up</Link>
           </p>
         </div>
 
         {/* Demo hint */}
         <div style={{
-          marginTop: 16, padding: '12px 16px', borderRadius: 'var(--radius)',
-          background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.1)',
+          marginTop: 20, padding: '14px 18px', borderRadius: 'var(--radius)',
+          background: 'rgba(99,102,241,0.04)', border: '1px solid rgba(99,102,241,0.08)',
           fontSize: '0.8rem', color: 'var(--color-text-secondary)', textAlign: 'center',
         }}>
-          Demo: use <strong>alice@test.com</strong> / <strong>password123</strong>
+          Demo: use <strong style={{ color: 'var(--color-brand-light)' }}>alice@test.com</strong> / <strong style={{ color: 'var(--color-brand-light)' }}>password123</strong>
         </div>
       </div>
+
+      <style>{`
+        .auth-page {
+          min-height: 100vh; display: flex; align-items: center; justify-content: center;
+          padding: 24px; position: relative; overflow: hidden;
+          background: var(--color-surface);
+        }
+        .auth-glow {
+          position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+          width: 600px; height: 600px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
+          pointer-events: none;
+        }
+      `}</style>
     </div>
   );
 }

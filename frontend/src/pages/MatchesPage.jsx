@@ -216,7 +216,7 @@ export default function MatchesPage() {
   const primaryMethod = matches.length > 0 ? matches[0].matchMethod : 'demo';
 
   return (
-    <div className="page-container fade-in" style={{ paddingTop: 84 }}>
+    <div className="page-container fade-in" style={{ paddingTop: 'calc(var(--nav-height) + 24px)' }}>
       {/* Header */}
       <div className="page-header">
         <div className="ai-page-badge">
