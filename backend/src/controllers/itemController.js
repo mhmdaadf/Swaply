@@ -145,13 +145,13 @@ exports.deleteItem = async (req, res, next) => {
 
 exports.estimateItemValue = async (req, res, next) => {
   try {
-    const { category, originalPrice, condition, ageMonths, title, description } = req.body;
+    const { category, originalPrice, condition, ageMonths, title, description, itemId } = req.body;
     
-    // Find up to 3 similar items in the same category to provide as internal context
-    const similarItems = await Item.find({ 
-      category, 
-      status: 'available' 
-    })
+    // Find up to 3 similar items (excluding the current one) to provide as internal context
+    const query = { category, status: 'available' };
+    if (itemId) query._id = { $ne: itemId };
+
+    const similarItems = await Item.find(query)
     .sort({ createdAt: -1 })
     .limit(3)
     .select('title swapPointValue condition');
@@ -167,12 +167,21 @@ exports.estimateItemValue = async (req, res, next) => {
       internalListings // Pass internal data to AI
     });
 
+    // Apply Trust Penalty: low honesty = lower valuation
+    let finalValue = estimation.swapPointValue;
+    const honesty = estimation.honestyScore ?? 1.0;
+    if (honesty < 0.9) {
+      // Penalty scales: 50% honesty → ~25% reduction, 30% → ~50% reduction
+      const penalty = 1 - ((1 - honesty) * 0.7);
+      finalValue = Math.round(finalValue * penalty);
+    }
+
     res.json({
-      swapPointValue: estimation.swapPointValue,
+      swapPointValue: finalValue,
       reasoning: estimation.reasoning,
       method: estimation.method,
       confidence: estimation.confidence ?? null,
-      honestyScore: estimation.honestyScore ?? 1.0,
+      honestyScore: honesty,
       redFlags: estimation.redFlags ?? [],
       baseline: estimation.baseline ?? null,
       internalComparison: internalListings // Send back for UI display

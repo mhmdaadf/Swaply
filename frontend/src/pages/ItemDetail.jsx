@@ -24,10 +24,16 @@ export default function ItemDetail() {
 
   return (
     <div className="page-container fade-in" style={{ paddingTop:84 }}>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:32 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:32 }} className="item-detail-grid">
         <div style={{ borderRadius:'var(--radius-lg)', overflow:'hidden', background:'var(--color-surface-elevated)', aspectRatio:'4/3' }}>
-          <img src={item.images?.[0] || placeholder} alt={item.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+          <img src={item.images?.[0] || placeholder} alt={item.title} loading="lazy" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
         </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .item-detail-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
         <div>
           <div style={{ display:'flex', gap:8, marginBottom:12 }}>
             <span className="badge badge-brand"><Tag size={10} /> {item.category}</span>

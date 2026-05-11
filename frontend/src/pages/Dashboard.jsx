@@ -15,8 +15,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(false);
 
-  // ... (load function stays same)
-
   const handleWizardComplete = (recommendation) => {
     setShowWizard(false);
     // Navigate to NewItemPage with prefilled state
@@ -46,10 +44,10 @@ export default function Dashboard() {
   }, []);
 
   const statCards = [
-    { label: 'My Listings', value: myItems.length, icon: Package, color: 'var(--color-brand-light)' },
-    { label: 'Active Trades', value: stats.trades, icon: ArrowRightLeft, color: 'var(--color-accent)' },
-    { label: 'Matches Found', value: stats.matches, icon: Sparkles, color: 'var(--color-success)' },
-    { label: 'Trust Score', value: user?.trustScore?.toFixed(1) || '5.0', icon: TrendingUp, color: '#f472b6' },
+    { label: 'My Listings', value: myItems.length, icon: Package, color: '#818cf8', bg: 'rgba(129,140,248,0.1)' },
+    { label: 'Active Trades', value: stats.trades, icon: ArrowRightLeft, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+    { label: 'Matches Found', value: stats.matches, icon: Sparkles, color: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
+    { label: 'Trust Score', value: user?.trustScore?.toFixed(1) || '5.0', icon: TrendingUp, color: '#f472b6', bg: 'rgba(244,114,182,0.1)' },
   ];
 
   return (
@@ -93,7 +91,7 @@ export default function Dashboard() {
         display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: 16, marginBottom: 40,
       }}>
-        {statCards.map(({ label, value, icon: Icon, color }) => (
+        {statCards.map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="card" style={{ padding: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
               <div>
@@ -102,7 +100,7 @@ export default function Dashboard() {
               </div>
               <div style={{
                 width: 40, height: 40, borderRadius: 'var(--radius)',
-                background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <Icon size={20} style={{ color }} />
               </div>

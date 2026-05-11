@@ -1,20 +1,39 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
 import { useAuthStore } from './store/authStore';
 import Navbar from './components/Navbar';
+
+// Eager-loaded (critical path)
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
-import ExplorePage from './pages/ExplorePage';
-import ItemDetail from './pages/ItemDetail';
-import NewItemPage from './pages/NewItemPage';
-import MatchesPage from './pages/MatchesPage';
-import TradesPage from './pages/TradesPage';
-import TradeDetail from './pages/TradeDetail';
-import NewTradePage from './pages/NewTradePage';
-import EstimatorPage from './pages/EstimatorPage';
-import ProfilePage from './pages/ProfilePage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
+
+// Lazy-loaded (non-critical, loaded on demand)
+const ExplorePage = lazy(() => import('./pages/ExplorePage'));
+const ItemDetail = lazy(() => import('./pages/ItemDetail'));
+const NewItemPage = lazy(() => import('./pages/NewItemPage'));
+const MatchesPage = lazy(() => import('./pages/MatchesPage'));
+const TradesPage = lazy(() => import('./pages/TradesPage'));
+const TradeDetail = lazy(() => import('./pages/TradeDetail'));
+const NewTradePage = lazy(() => import('./pages/NewTradePage'));
+const EstimatorPage = lazy(() => import('./pages/EstimatorPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+
+function PageLoader() {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      minHeight: '60vh',
+    }}>
+      <div style={{
+        width: 40, height: 40, border: '3px solid var(--color-border)',
+        borderTopColor: 'var(--color-brand-light)', borderRadius: '50%',
+      }} className="animate-spin" />
+    </div>
+  );
+}
 
 function ProtectedRoute({ children }) {
   const { accessToken } = useAuthStore();
@@ -32,24 +51,26 @@ export default function App() {
   return (
     <BrowserRouter>
       <Navbar />
-      <Routes>
-        <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
-        <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/explore" element={<ProtectedRoute><ExplorePage /></ProtectedRoute>} />
-        <Route path="/items/new" element={<ProtectedRoute><NewItemPage /></ProtectedRoute>} />
-        <Route path="/items/:id" element={<ProtectedRoute><ItemDetail /></ProtectedRoute>} />
-        <Route path="/matches" element={<ProtectedRoute><MatchesPage /></ProtectedRoute>} />
-        <Route path="/trades" element={<ProtectedRoute><TradesPage /></ProtectedRoute>} />
-        <Route path="/trades/new" element={<ProtectedRoute><NewTradePage /></ProtectedRoute>} />
-        <Route path="/trades/:id" element={<ProtectedRoute><TradeDetail /></ProtectedRoute>} />
-        <Route path="/estimator" element={<ProtectedRoute><EstimatorPage /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
-        <Route path="/reset-password/:token" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+          <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/explore" element={<ProtectedRoute><ExplorePage /></ProtectedRoute>} />
+          <Route path="/items/new" element={<ProtectedRoute><NewItemPage /></ProtectedRoute>} />
+          <Route path="/items/:id" element={<ProtectedRoute><ItemDetail /></ProtectedRoute>} />
+          <Route path="/matches" element={<ProtectedRoute><MatchesPage /></ProtectedRoute>} />
+          <Route path="/trades" element={<ProtectedRoute><TradesPage /></ProtectedRoute>} />
+          <Route path="/trades/new" element={<ProtectedRoute><NewTradePage /></ProtectedRoute>} />
+          <Route path="/trades/:id" element={<ProtectedRoute><TradeDetail /></ProtectedRoute>} />
+          <Route path="/estimator" element={<ProtectedRoute><EstimatorPage /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
+          <Route path="/reset-password/:token" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

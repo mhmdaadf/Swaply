@@ -54,7 +54,9 @@ app.use(errorHandler);
 
 // Socket.io events
 io.on('connection', (socket) => {
-  console.log(`Socket connected: ${socket.id}`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`Socket connected: ${socket.id}`);
+  }
 
   socket.on('join_trade', (tradeId) => {
     socket.join(`trade_${tradeId}`);
@@ -73,7 +75,9 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log(`Socket disconnected: ${socket.id}`);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`Socket disconnected: ${socket.id}`);
+    }
   });
 });
 

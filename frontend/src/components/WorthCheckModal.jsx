@@ -28,6 +28,7 @@ export default function WorthCheckModal({ item, onClose }) {
         ageMonths: item.ageMonths,
         title: item.title,
         description: item.description,
+        itemId: item._id, // Pass ID to exclude it from market comparisons
       });
       setResult(data);
     } catch (err) {
@@ -140,16 +141,6 @@ export default function WorthCheckModal({ item, onClose }) {
                 </div>
              )}
 
-             <div className="ai-modal-tech">
-                <div className="tech-row">
-                  <span><Zap size={10} /> Model</span>
-                  <span>Llama 3.3 70B</span>
-                </div>
-                <div className="tech-row">
-                  <span><Shield size={10} /> Safety</span>
-                  <span>Market-Clamped</span>
-                </div>
-             </div>
           </div>
         ) : (
           <p style={{ textAlign: 'center', padding: 20 }}>Failed to analyze item.</p>

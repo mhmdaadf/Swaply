@@ -15,6 +15,10 @@ const errorHandler = (err, req, res, _next) => {
     return res.status(400).json({ message: `Invalid ${err.path}: ${err.value}` });
   }
 
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ message: 'Invalid JSON in request body' });
+  }
+
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
     message: err.message || 'Internal server error',
