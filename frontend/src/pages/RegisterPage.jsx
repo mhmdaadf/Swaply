@@ -15,7 +15,10 @@ export default function RegisterPage() {
     try {
       await register({ username, email, password });
       navigate('/dashboard');
-    } catch {}
+    } catch (err) {
+      // Error is already handled by useAuthStore and displayed in the UI
+      console.error('Registration error:', err);
+    }
   };
 
   return (
