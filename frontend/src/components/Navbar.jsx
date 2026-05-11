@@ -7,10 +7,9 @@ import {
 
 const NAV_ITEMS = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/explore', label: 'Explore', icon: Search },
   { path: '/matches', label: 'Smart Swaps', icon: Sparkles },
   { path: '/trades', label: 'My Deals', icon: ArrowRightLeft },
-  { path: '/estimator', label: 'Worth Check', icon: MessageSquare },
+  { path: '/explore', label: 'Explore', icon: Search },
 ];
 
 export default function Navbar() {

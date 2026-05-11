@@ -1,18 +1,35 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../lib/api';
-import { Upload, CheckCircle2, Loader2 } from 'lucide-react';
+import { Upload, CheckCircle2, Loader2, Wand2 } from 'lucide-react';
 
 const CATEGORIES = ['Electronics','Books','Clothing','Furniture','Sports','Toys','Music','Art','Tools','Automotive','Collectibles','Other'];
 const CONDITIONS = ['New','Like New','Good','Fair','Poor'];
 
 export default function NewItemPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({ title:'', description:'', category:'Electronics', condition:'Good', originalPrice:'', ageMonths:'0', desiredItems:'' });
   const [files, setFiles] = useState([]);
   const [estimatedValue, setEstimatedValue] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (location.state?.prefill) {
+      const p = location.state.prefill;
+      setForm({
+        title: p.title || '',
+        description: p.description || '',
+        category: p.category || 'Electronics',
+        condition: p.condition || 'Good',
+        originalPrice: p.originalPrice || '',
+        ageMonths: p.ageMonths?.toString() || '0',
+        desiredItems: ''
+      });
+      setEstimatedValue(p.swapPointValue || null);
+    }
+  }, [location.state]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -44,9 +61,16 @@ export default function NewItemPage() {
 
   return (
     <div className="page-container fade-in" style={{ paddingTop:84, maxWidth:640 }}>
-      <div className="page-header">
-        <h1 className="page-title">List a New Item</h1>
-        <p className="page-subtitle">Add your item to start finding swaps</p>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div>
+          <h1 className="page-title">List a New Item</h1>
+          <p className="page-subtitle">Add your item to start finding swaps</p>
+        </div>
+        {location.state?.prefill && (
+          <div className="badge" style={{ background: 'rgba(167, 139, 250, 0.1)', color: '#a78bfa', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+            <Wand2 size={12} /> AI Assisted
+          </div>
+        )}
       </div>
       <div className="card" style={{ padding:32 }}>
         <form onSubmit={handleSubmit}>

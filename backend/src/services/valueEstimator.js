@@ -47,14 +47,22 @@ Consider ALL of the following when estimating:
 - Brand reputation and demand in the secondhand market
 - Category-specific value retention (e.g. collectibles hold value better than electronics)
 - The description details (accessories included, cosmetic damage, completeness)
+- Current "Internal Listings" on the Swaply platform
+- **Honesty Audit**: Cross-reference the "Condition" field with the "Description". Look for contradictions (e.g., if they say "Like New" but describe "scratches" or "broken parts").
 
-You will receive a heuristic baseline computed from a depreciation formula. Your job is to IMPROVE on this baseline using your knowledge of real-world market values.
+You will receive a heuristic baseline computed from a depreciation formula. Your job is to IMPROVE on this baseline using your knowledge of real-world market values AND the internal listings provided.
 
 Respond ONLY with valid JSON — no markdown, no backticks, no explanation outside JSON:
-{"swapPoints": <integer>, "confidence": <0.0-1.0>, "reasoning": "<2-3 sentences explaining your valuation>"}`;
+{
+  "swapPoints": <integer>, 
+  "confidence": <0.0-1.0>, 
+  "honestyScore": <0.0-1.0>,
+  "redFlags": ["string", "string"],
+  "reasoning": "<2-3 sentences explaining your valuation and honesty audit>"
+}`;
 
-function buildUserPrompt({ title, description, category, originalPrice, condition, ageMonths, heuristicBaseline }) {
-  return [
+function buildUserPrompt({ title, description, category, originalPrice, condition, ageMonths, heuristicBaseline, internalListings }) {
+  const lines = [
     `Item: ${title || 'Unknown Item'}`,
     `Category: ${category}`,
     `Condition: ${condition}`,
@@ -63,13 +71,26 @@ function buildUserPrompt({ title, description, category, originalPrice, conditio
     `Description: ${description || 'No description provided'}`,
     ``,
     `Heuristic Baseline: ${heuristicBaseline} Swap Points`,
-    `(Use this baseline as a reference, but override it if your market knowledge suggests a different value.)`,
-  ].join('\n');
+  ];
+
+  if (internalListings && internalListings.length > 0) {
+    lines.push(``);
+    lines.push(`CURRENT SIMILAR LISTINGS ON SWAPLY:`);
+    internalListings.forEach(item => {
+      lines.push(`- ${item.title}: ${item.value} pts (Condition: ${item.condition})`);
+    });
+    lines.push(`(Use these to calibrate the value against what is already available on the site.)`);
+  } else {
+    lines.push(``);
+    lines.push(`(No similar items currently listed on Swaply. Base your value on global market trends and the heuristic.)`);
+  }
+
+  return lines.join('\n');
 }
 
 // ---------- Main estimation function ----------
 
-async function estimateValue({ category, originalPrice, condition, ageMonths, title, description }) {
+async function estimateValue({ category, originalPrice, condition, ageMonths, title, description, internalListings }) {
   const baseline = heuristicEstimate({ category, originalPrice, condition, ageMonths });
 
   if (!originalPrice || originalPrice <= 0) {
@@ -81,6 +102,7 @@ async function estimateValue({ category, originalPrice, condition, ageMonths, ti
       const userPrompt = buildUserPrompt({
         title, description, category, originalPrice, condition, ageMonths,
         heuristicBaseline: baseline,
+        internalListings, // Pass internal listings to prompt builder
       });
 
       const reply = await chatCompletion(SYSTEM_PROMPT, userPrompt, {
@@ -93,6 +115,8 @@ async function estimateValue({ category, originalPrice, condition, ageMonths, ti
           const parsed = JSON.parse(jsonMatch[0]);
           let aiValue = parseInt(parsed.swapPoints, 10);
           const confidence = parseFloat(parsed.confidence) || 0.7;
+          const honestyScore = parseFloat(parsed.honestyScore) || 1.0;
+          const redFlags = Array.isArray(parsed.redFlags) ? parsed.redFlags : [];
 
           // Validate AI value is reasonable
           if (!isNaN(aiValue) && aiValue > 0) {
@@ -107,6 +131,8 @@ async function estimateValue({ category, originalPrice, condition, ageMonths, ti
               reasoning: parsed.reasoning || null,
               method: 'ai',
               confidence: Math.max(0, Math.min(1, confidence)),
+              honestyScore: Math.max(0, Math.min(1, honestyScore)),
+              redFlags,
               baseline, // expose baseline so frontend can show "AI adjusted from X to Y"
             };
           }

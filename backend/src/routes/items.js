@@ -29,6 +29,7 @@ router.get('/', items.getItems);
 router.get('/my', protect, items.getMyItems);
 router.post('/', protect, upload.array('images', 5), items.createItem);
 router.post('/estimate', protect, items.estimateItemValue);
+router.post('/wizard-chat', protect, items.wizardChat);
 router.get('/:id', items.getItem);
 router.put('/:id', protect, items.updateItem);
 router.delete('/:id', protect, items.deleteItem);

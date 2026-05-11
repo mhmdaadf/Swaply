@@ -227,6 +227,23 @@ function AIResultCard({ result }) {
 
         {showDetails && (
           <div className="ai-details-panel fade-in">
+            {/* Internal Marketplace context */}
+            {result.internalComparison && result.internalComparison.length > 0 && (
+              <div className="ai-internal-comparison">
+                <p className="ai-internal-title">
+                  <Search size={11} /> Internal Market Examples
+                </p>
+                <div className="ai-internal-list">
+                  {result.internalComparison.map((item, i) => (
+                    <div key={i} className="ai-internal-item">
+                      <span className="ai-internal-name">{item.title}</span>
+                      <span className="ai-internal-val">{item.value} pts</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="ai-detail-row">
               <span className="ai-detail-label"><Shield size={10} /> Safety</span>
               <span className="ai-detail-value">Guardrailed (±4x baseline clamp)</span>
@@ -568,6 +585,23 @@ export default function EstimatorPage() {
           color: var(--color-text-muted); display: flex; align-items: center; gap: 4px;
         }
         .ai-detail-value { color: var(--color-text-secondary); font-weight: 500; }
++
++        .ai-internal-comparison {
++          margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);
++          text-align: left;
++        }
++        .ai-internal-title {
++          font-size: 0.65rem; font-weight: 700; color: #a78bfa;
++          text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
++          display: flex; align-items: center; gap: 4px;
++        }
++        .ai-internal-list { display: flex; flex-direction: column; gap: 4px; }
++        .ai-internal-item {
++          display: flex; justify-content: space-between; font-size: 0.72rem;
++          background: rgba(255,255,255,0.03); padding: 4px 8px; border-radius: 4px;
++        }
++        .ai-internal-name { color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
++        .ai-internal-val { color: var(--color-brand-light); font-weight: 700; }
 
         /* --- Page-level --- */
         .ai-page-badge {

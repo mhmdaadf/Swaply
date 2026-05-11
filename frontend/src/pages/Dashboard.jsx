@@ -1,16 +1,27 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 import ItemCard from '../components/ItemCard';
 import TrustBadge from '../components/TrustBadge';
-import { Package, ArrowRightLeft, Sparkles, TrendingUp, PlusCircle } from 'lucide-react';
+import ListingWizard from '../components/ListingWizard';
+import { Package, ArrowRightLeft, Sparkles, TrendingUp, PlusCircle, Wand2 } from 'lucide-react';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { user } = useAuthStore();
   const [myItems, setMyItems] = useState([]);
   const [stats, setStats] = useState({ trades: 0, matches: 0 });
   const [loading, setLoading] = useState(true);
+  const [showWizard, setShowWizard] = useState(false);
+
+  // ... (load function stays same)
+
+  const handleWizardComplete = (recommendation) => {
+    setShowWizard(false);
+    // Navigate to NewItemPage with prefilled state
+    navigate('/items/new', { state: { prefill: recommendation } });
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -51,10 +62,31 @@ export default function Dashboard() {
             <TrustBadge score={user?.trustScore} />
           </div>
         </div>
-        <Link to="/items/new" className="btn btn-primary">
-          <PlusCircle size={16} /> List New Item
-        </Link>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button 
+            className="btn" 
+            style={{ 
+              background: 'rgba(167, 139, 250, 0.1)', 
+              color: '#a78bfa', 
+              border: '1px solid rgba(167, 139, 250, 0.3)',
+              display: 'flex', alignItems: 'center', gap: 8
+            }}
+            onClick={() => setShowWizard(true)}
+          >
+            <Wand2 size={16} /> Smart AI List
+          </button>
+          <Link to="/items/new" className="btn btn-primary">
+            <PlusCircle size={16} /> Manual List
+          </Link>
+        </div>
       </div>
+
+      {showWizard && (
+        <ListingWizard 
+          onClose={() => setShowWizard(false)} 
+          onComplete={handleWizardComplete} 
+        />
+      )}
 
       {/* Stats */}
       <div style={{

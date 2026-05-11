@@ -1,5 +1,6 @@
 const Item = require('../models/Item');
 const { estimateValue, estimateValueSync } = require('../services/valueEstimator');
+const { getWizardResponse } = require('../services/listingWizard');
 
 // Parse desiredItems from multipart form data (may arrive as JSON string or comma-separated)
 function parseDesiredItems(raw) {
@@ -145,14 +146,47 @@ exports.deleteItem = async (req, res, next) => {
 exports.estimateItemValue = async (req, res, next) => {
   try {
     const { category, originalPrice, condition, ageMonths, title, description } = req.body;
-    const estimation = await estimateValue({ category, originalPrice, condition, ageMonths, title, description });
+    
+    // Find up to 3 similar items in the same category to provide as internal context
+    const similarItems = await Item.find({ 
+      category, 
+      status: 'available' 
+    })
+    .sort({ createdAt: -1 })
+    .limit(3)
+    .select('title swapPointValue condition');
+
+    const internalListings = similarItems.map(item => ({
+      title: item.title,
+      value: item.swapPointValue,
+      condition: item.condition
+    }));
+
+    const estimation = await estimateValue({ 
+      category, originalPrice, condition, ageMonths, title, description,
+      internalListings // Pass internal data to AI
+    });
+
     res.json({
       swapPointValue: estimation.swapPointValue,
       reasoning: estimation.reasoning,
       method: estimation.method,
       confidence: estimation.confidence ?? null,
+      honestyScore: estimation.honestyScore ?? 1.0,
+      redFlags: estimation.redFlags ?? [],
       baseline: estimation.baseline ?? null,
+      internalComparison: internalListings // Send back for UI display
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.wizardChat = async (req, res, next) => {
+  try {
+    const { messages, currentData } = req.body;
+    const response = await getWizardResponse(messages, currentData);
+    res.json(response);
   } catch (err) {
     next(err);
   }
