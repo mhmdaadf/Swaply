@@ -21,8 +21,8 @@ export default function TradesPage() {
   return (
     <div className="page-container fade-in" style={{ paddingTop:84 }}>
       <div className="page-header">
-        <h1 className="page-title">My Trades</h1>
-        <p className="page-subtitle">Track your active and past trade proposals</p>
+        <h1 className="page-title">My Deals</h1>
+        <p className="page-subtitle">Track and manage your ongoing item swaps</p>
       </div>
       {loading ? (
         <div style={{ display:'flex', flexDirection:'column', gap:16 }}>{[1,2,3].map(i => <div key={i} className="skeleton" style={{ height:100 }} />)}</div>

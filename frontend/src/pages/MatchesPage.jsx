@@ -225,9 +225,9 @@ export default function MatchesPage() {
         </div>
         <h1 className="page-title">
           <Sparkles size={24} style={{ display: 'inline', marginRight: 8, color: 'var(--color-brand-light)' }} />
-          Smart Matches
+          Smart Swaps
         </h1>
-        <p className="page-subtitle">Bi-directional trade matching powered by semantic AI analysis</p>
+        <p className="page-subtitle">AI-powered trade matches based on your personal preferences</p>
       </div>
 
       {loading ? (
