@@ -17,7 +17,7 @@ import {
 import ItemCard from '../components/ItemCard';
 
 export default function LandingPage() {
-  // Dummy data for Marketplace Preview
+  // Expanded data for Marketplace Preview (12 items)
   const previewItems = [
     {
       _id: 'p1',
@@ -43,8 +43,89 @@ export default function LandingPage() {
       category: 'Furniture',
       condition: 'Good',
       swapPointValue: 850,
-      images: ['https://images.unsplash.com/photo-1505843490701-5be5d0b19d58?auto=format&fit=crop&q=80&w=400'],
+      images: ['https://images.unsplash.com/photo-1580480055273-228ff5388ef8?auto=format&fit=crop&q=80&w=400'],
       owner: { username: 'MikeR', trustScore: 4.7 }
+    },
+    {
+      _id: 'p4',
+      title: 'Sony WH-1000XM5',
+      category: 'Audio',
+      condition: 'New',
+      swapPointValue: 350,
+      images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=400'],
+      owner: { username: 'EmmaW', trustScore: 4.9 }
+    },
+    {
+      _id: 'p5',
+      title: 'MacBook Pro 14" M3',
+      category: 'Electronics',
+      condition: 'Like New',
+      swapPointValue: 2400,
+      images: ['https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&q=80&w=400'],
+      owner: { username: 'DavidL', trustScore: 5.0 }
+    },
+    {
+      _id: 'p6',
+      title: 'Garmin Fenix 7 Solar',
+      category: 'Wearables',
+      condition: 'New',
+      swapPointValue: 700,
+      images: ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=400'],
+      owner: { username: 'ChrisB', trustScore: 4.6 }
+    },
+    {
+      _id: 'p7',
+      title: 'Canyon Road Bike',
+      category: 'Sports',
+      condition: 'Used',
+      swapPointValue: 1500,
+      images: ['https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&q=80&w=400'],
+      owner: { username: 'JuliaM', trustScore: 4.8 }
+    },
+    {
+      _id: 'p8',
+      title: 'Breville Barista Pro',
+      category: 'Appliances',
+      condition: 'Like New',
+      swapPointValue: 650,
+      images: ['https://images.unsplash.com/photo-1595434027099-31419445679a?auto=format&fit=crop&q=80&w=400'],
+      owner: { username: 'RyanS', trustScore: 4.9 }
+    },
+    {
+      _id: 'p9',
+      title: 'Nike Dunk Low Panda',
+      category: 'Fashion',
+      condition: 'New',
+      swapPointValue: 180,
+      images: ['https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&q=80&w=400'],
+      owner: { username: 'LeoT', trustScore: 4.7 }
+    },
+    {
+      _id: 'p10',
+      title: 'Peak Design Backpack',
+      category: 'Accessories',
+      condition: 'Good',
+      swapPointValue: 220,
+      images: ['https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?auto=format&fit=crop&q=80&w=400'],
+      owner: { username: 'SophieP', trustScore: 4.8 }
+    },
+    {
+      _id: 'p11',
+      title: 'BenQ ScreenBar Halo',
+      category: 'Electronics',
+      condition: 'New',
+      swapPointValue: 150,
+      images: ['https://images.unsplash.com/photo-1534073828943-f801091bb18c?auto=format&fit=crop&q=80&w=400'],
+      owner: { username: 'MarcG', trustScore: 4.9 }
+    },
+    {
+      _id: 'p12',
+      title: 'Keychron Q1 Keyboard',
+      category: 'Electronics',
+      condition: 'New',
+      swapPointValue: 210,
+      images: ['https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?auto=format&fit=crop&q=80&w=400'],
+      owner: { username: 'NateW', trustScore: 5.0 }
     }
   ];
 
@@ -205,10 +286,16 @@ export default function LandingPage() {
             <h2 className="lp-section-title">Trending Now</h2>
             <p className="lp-section-desc">Join thousands of users already swapping high-value items.</p>
           </div>
-          <div className="lp-preview-grid">
-            {previewItems.map(item => (
-              <ItemCard key={item._id} item={item} />
-            ))}
+          <div className="lp-carousel-wrapper">
+            <div className="lp-carousel no-scrollbar">
+              {previewItems.map(item => (
+                <div key={item._id} className="lp-carousel-item">
+                  <ItemCard item={item} />
+                </div>
+              ))}
+            </div>
+            <div className="lp-carousel-gradient left" />
+            <div className="lp-carousel-gradient right" />
           </div>
           <div className="text-center mt-10">
             <Link to="/explore" className="btn btn-secondary">
@@ -291,6 +378,17 @@ export default function LandingPage() {
                 <Link to="/matches">Smart Swaps</Link>
               </div>
               <div>
+                <h5>Company</h5>
+                <Link to="/about">About Us</Link>
+                <Link to="/contact">Contact</Link>
+                <Link to="/blog">Blog</Link>
+              </div>
+              <div>
+                <h5>Legal</h5>
+                <Link to="/privacy">Privacy Policy</Link>
+                <Link to="/terms">Terms of Service</Link>
+              </div>
+              <div>
                 <h5>Account</h5>
                 <Link to="/login">Login</Link>
                 <Link to="/register">Register</Link>
@@ -353,8 +451,15 @@ export default function LandingPage() {
         .lp-ai-res-label { font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; font-weight: 700; }
         .lp-ai-res-reason { font-size: var(--text-sm); font-style: italic; color: var(--color-text-secondary); text-align: center; }
 
-        /* Marketplace */
-        .lp-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); }
+        /* Marketplace Carousel */
+        .lp-carousel-wrapper { position: relative; margin: 0 calc(var(--space-6) * -1); padding: 0 var(--space-6); }
+        .lp-carousel { display: flex; gap: var(--space-6); overflow-x: auto; scroll-snap-type: x mandatory; padding: var(--space-4) 0 var(--space-10); scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+        .lp-carousel-item { flex: 0 0 350px; scroll-snap-align: start; }
+        .lp-carousel-gradient { position: absolute; top: 0; bottom: 0; width: 100px; z-index: 2; pointer-events: none; }
+        .lp-carousel-gradient.left { left: 0; background: linear-gradient(to right, var(--color-surface-0), transparent); }
+        .lp-carousel-gradient.right { right: 0; background: linear-gradient(to left, var(--color-surface-0), transparent); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* Trust */
         .lp-trust-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--space-16); align-items: center; }
@@ -388,7 +493,7 @@ export default function LandingPage() {
         @media (max-width: 1024px) {
           .lp-hero-title { font-size: 3.5rem; }
           .lp-steps-grid { grid-template-columns: repeat(2, 1fr); }
-          .lp-preview-grid { grid-template-columns: repeat(2, 1fr); }
+          .lp-carousel-item { flex: 0 0 300px; }
         }
 
         @media (max-width: 768px) {
@@ -399,7 +504,7 @@ export default function LandingPage() {
           .lp-hero-stats { justify-content: center; }
           .lp-ai-grid, .lp-trust-grid { grid-template-columns: 1fr; gap: var(--space-10); }
           .lp-steps-grid { grid-template-columns: 1fr; }
-          .lp-preview-grid { grid-template-columns: 1fr; }
+          .lp-carousel-item { flex: 0 0 280px; }
           .lp-cta-title { font-size: 2.5rem; }
           .lp-footer-grid { flex-direction: column; gap: var(--space-10); }
         }
