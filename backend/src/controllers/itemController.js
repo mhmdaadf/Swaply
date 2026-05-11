@@ -6,7 +6,7 @@ function parseDesiredItems(raw) {
   if (!raw) return [];
   if (Array.isArray(raw)) return raw.map(s => s.trim()).filter(Boolean);
   if (typeof raw === 'string') {
-    try { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) return parsed; } catch {}
+    try { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) return parsed; } catch { }
     return raw.split(',').map(s => s.trim()).filter(Boolean);
   }
   return [];
@@ -23,7 +23,7 @@ exports.createItem = async (req, res, next) => {
     const item = await Item.create({
       title,
       description,
-      images: req.files ? req.files.map(f => f.path || `/uploads/${f.filename}`) : [],
+      images: req.files ? req.files.map(f => `/uploads/${f.filename}`) : [],
       category,
       condition,
       originalPrice,
