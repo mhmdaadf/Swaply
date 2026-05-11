@@ -9,3 +9,14 @@ aliceff proposed a new trade with you!
 
 Log in to see the details.
 ------------------------------------------------------------
+
+[2026-05-11T08:02:01.235Z] 
+TO: dave@test.com
+SUBJECT: Swaply: new proposal
+BODY: 
+Hi dave,
+
+aliceff proposed a new trade with you!
+
+Log in to see the details.
+------------------------------------------------------------

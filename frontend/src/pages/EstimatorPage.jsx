@@ -182,11 +182,7 @@ function AIResultCard({ result }) {
         {/* Main Value */}
         <TrendingUp size={28} style={{ color: 'var(--color-accent)', margin: '0 auto 8px', display: 'block' }} />
         <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: 4 }}>Estimated Swap Value</p>
-        <p className="ai-result-value" style={{
-          background: isAI
-            ? 'linear-gradient(135deg, #818cf8, #a78bfa, #fbbf24)'
-            : 'linear-gradient(135deg, var(--color-accent), var(--color-brand-light))',
-        }}>
+        <p className={`ai-result-value ${isAI ? 'ai-value-ai' : 'ai-value-demo'}`}>
           {showValue ? countUp : '—'} pts
         </p>
 
@@ -487,8 +483,17 @@ export default function EstimatorPage() {
         /* Value display */
         .ai-result-value {
           font-size: 3.2rem; font-weight: 900; letter-spacing: -0.03em;
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-          background-clip: text; line-height: 1.1; margin-bottom: 8px;
+          line-height: 1.1; margin: 0 auto 8px;
+          display: block; width: fit-content;
+          -webkit-background-clip: text !important;
+          -webkit-text-fill-color: transparent !important;
+          background-clip: text !important;
+        }
+        .ai-value-ai {
+          background: linear-gradient(135deg, #818cf8, #a78bfa, #fbbf24);
+        }
+        .ai-value-demo {
+          background: linear-gradient(135deg, var(--color-accent), var(--color-brand-light));
         }
 
         /* Adjustment indicator */
