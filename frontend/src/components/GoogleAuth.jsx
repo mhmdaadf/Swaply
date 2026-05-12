@@ -12,7 +12,7 @@ export default function GoogleAuth() {
     if (!clientId) return;
 
     const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
+    script.src = 'https://accounts.google.com/gsi/client?hl=en';
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
@@ -21,6 +21,11 @@ export default function GoogleAuth() {
       if (window.google) {
         window.google.accounts.id.initialize({
           client_id: clientId,
+          auto_select: false,
+          itp_support: true,
+          context: 'signin',
+          ux_mode: 'popup',
+          locale: 'en',
           callback: async (response) => {
             try {
               await googleLogin(response.credential);

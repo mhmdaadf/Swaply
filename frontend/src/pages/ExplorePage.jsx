@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../lib/api';
 import ItemCard from '../components/ItemCard';
+import { SkeletonCard } from '../components/Skeleton';
+import EmptyState from '../components/EmptyState';
 import { Search, SlidersHorizontal, Package } from 'lucide-react';
 
 const CATEGORIES = ['All','Electronics','Books','Clothing','Furniture','Sports','Toys','Music','Art','Tools','Automotive','Collectibles','Other'];
@@ -55,14 +57,14 @@ export default function ExplorePage() {
 
       {loading ? (
         <div className="explore-grid">
-          {[1,2,3,4,5,6].map(i => <div key={i} className="skeleton" style={{ height: 340 }} />)}
+          {[1,2,3,4,5,6].map(i => <SkeletonCard key={i} />)}
         </div>
       ) : items.length === 0 ? (
-        <div className="card empty-state">
-          <div className="empty-state-icon"><Package size={28} style={{ color: 'var(--color-text-muted)' }} /></div>
-          <p className="empty-state-title">No items found</p>
-          <p className="empty-state-desc">Try adjusting your search or filters</p>
-        </div>
+        <EmptyState 
+          type="search" 
+          title="No items found" 
+          desc="Try adjusting your search or filters to find what you're looking for." 
+        />
       ) : (
         <div className="explore-grid">
           {items.map(item => <ItemCard key={item._id} item={item} />)}

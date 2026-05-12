@@ -56,9 +56,17 @@ const itemSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['available', 'in_trade', 'swapped'],
+    enum: ['available', 'in_trade', 'swapped', 'pending_review', 'flagged'],
     default: 'available',
   },
+  moderationRisk: {
+    type: String,
+    enum: ['Low', 'Medium', 'High'],
+    default: 'Low'
+  },
+  moderationFlags: [String],
+  moderationReasoning: String,
+  moderationSuggestions: String,
 }, { timestamps: true });
 
 itemSchema.index({ owner: 1 });

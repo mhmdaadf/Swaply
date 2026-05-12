@@ -12,6 +12,10 @@ const itemRoutes = require('./routes/items');
 const tradeRoutes = require('./routes/trades');
 const messageRoutes = require('./routes/messages');
 const matchRoutes = require('./routes/matches');
+const reportRoutes = require('./routes/reports');
+const adminRoutes = require('./routes/admin');
+const notificationRoutes = require('./routes/notifications');
+const ratingRoutes = require('./routes/ratings');
 
 const app = express();
 const server = http.createServer(app);
@@ -19,7 +23,7 @@ const server = http.createServer(app);
 // Socket.io
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: [process.env.CLIENT_URL || 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
     methods: ['GET', 'POST'],
   },
 });
@@ -27,7 +31,7 @@ app.set('io', io);
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: [process.env.CLIENT_URL || 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
   credentials: true,
 }));
 app.use(express.json());
@@ -43,6 +47,10 @@ app.use('/api/items', itemRoutes);
 app.use('/api/trades', tradeRoutes);
 app.use('/api/trades', messageRoutes);
 app.use('/api/matches', matchRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/ratings', ratingRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -57,6 +65,10 @@ io.on('connection', (socket) => {
   if (process.env.NODE_ENV !== 'production') {
     console.log(`Socket connected: ${socket.id}`);
   }
+
+  socket.on('join_user', (userId) => {
+    socket.join(userId);
+  });
 
   socket.on('join_trade', (tradeId) => {
     socket.join(`trade_${tradeId}`);

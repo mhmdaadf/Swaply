@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { LayoutDashboard, Search, ArrowRightLeft, Sparkles, User } from 'lucide-react';
+import { LayoutDashboard, Search, ArrowRightLeft, Sparkles, User, Shield } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 const NAV_ITEMS = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -12,6 +13,11 @@ const NAV_ITEMS = [
 export default function Navbar() {
   const { user } = useAuthStore();
   const location = useLocation();
+
+  const navItems = [...NAV_ITEMS];
+  if (user?.role === 'admin' || user?.role === 'superadmin') {
+    navItems.push({ path: '/admin', label: 'Admin', icon: Shield });
+  }
 
   // On public pages (Landing, Login, Register), we show a specific public navbar if not logged in
   const isPublicPage = ['/', '/login', '/register', '/forgot-password', '/reset-password'].includes(location.pathname);
@@ -28,7 +34,7 @@ export default function Navbar() {
           {user ? (
             <>
               <div className="nav-links">
-                {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
+                {navItems.map(({ path, label, icon: Icon }) => {
                   const active = location.pathname.startsWith(path);
                   return (
                     <Link key={path} to={path} aria-current={active ? 'page' : undefined}
@@ -40,17 +46,20 @@ export default function Navbar() {
                 })}
               </div>
 
-              <Link to="/profile" className="nav-user" aria-label={`Profile: ${user.username}`}>
-                <div className="nav-user-avatar">
-                  {user.profilePic ? (
-                    <img src={user.profilePic} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                  ) : (
-                    user.username?.charAt(0).toUpperCase()
-                  )}
-                </div>
-                <span className="nav-user-name">{user.username}</span>
-                <span className="nav-user-score">{user.trustScore?.toFixed(1)}</span>
-              </Link>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <NotificationBell />
+                <Link to="/profile" className="nav-user" aria-label={`Profile: ${user.username}`}>
+                  <div className="nav-user-avatar">
+                    {user.profilePic ? (
+                      <img src={user.profilePic} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      user.username?.charAt(0).toUpperCase()
+                    )}
+                  </div>
+                  <span className="nav-user-name">{user.username}</span>
+                  <span className="nav-user-score">{user.trustScore?.toFixed(1)}</span>
+                </Link>
+              </div>
             </>
           ) : (
             <div className="nav-guest-actions">
@@ -63,7 +72,7 @@ export default function Navbar() {
 
       {user && (
         <nav className="nav-mobile" role="navigation" aria-label="Mobile navigation">
-          {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
+          {navItems.map(({ path, label, icon: Icon }) => {
             const active = location.pathname.startsWith(path);
             return (
               <Link key={path} to={path} aria-current={active ? 'page' : undefined}

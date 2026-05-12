@@ -3,6 +3,23 @@ const Item = require('../models/Item');
 const Rating = require('../models/Rating');
 const User = require('../models/User');
 const emailService = require('../services/emailService');
+const notificationController = require('./notificationController');
+
+const calculateTrustScore = (user) => {
+  if (user.totalRatings === 0) return 5.0; // Base score for new users
+  
+  const ratingAvg = user.ratingSum / user.totalRatings;
+  const completionRatio = user.completedTrades / (user.completedTrades + user.cancelledTrades || 1);
+  
+  // Base 80% on ratings, 20% on completion ratio
+  let score = (ratingAvg * 0.8) + (completionRatio * 5 * 0.2);
+  
+  // Bonus for high volume of successful trades (up to +0.5)
+  const volumeBonus = Math.min(user.completedTrades * 0.05, 0.5);
+  score += volumeBonus;
+
+  return Math.min(Math.max(parseFloat(score.toFixed(1)), 0), 5.0);
+};
 
 exports.createTrade = async (req, res, next) => {
   try {
@@ -48,6 +65,14 @@ exports.createTrade = async (req, res, next) => {
 
     // Notify receiver
     await emailService.sendTradeNotification(populated.receiver, populated.initiator, 'new_proposal');
+    await notificationController.createNotification(req.app, {
+      recipient: receiverId,
+      sender: initiatorId,
+      type: 'new_trade',
+      content: `New trade proposal for "${requestedItems[0].title}" from ${req.user.username}`,
+      link: `/trades/${trade._id}`,
+      relatedId: trade._id
+    });
 
     res.status(201).json(populated);
   } catch (err) {
@@ -144,6 +169,14 @@ exports.updateTradeStatus = async (req, res, next) => {
       );
       // Notify initiator that their trade was accepted
       await emailService.sendTradeNotification(trade.initiator, trade.receiver, 'accepted');
+      await notificationController.createNotification(req.app, {
+        recipient: trade.initiator._id,
+        sender: trade.receiver._id,
+        type: 'trade_update',
+        content: `Your trade proposal was accepted by ${trade.receiver.username}`,
+        link: `/trades/${trade._id}`,
+        relatedId: trade._id
+      });
     }
 
     // Mark items as swapped when completed
@@ -157,6 +190,23 @@ exports.updateTradeStatus = async (req, res, next) => {
       const notifier = isInitiator ? trade.initiator : trade.receiver;
       const notified = isInitiator ? trade.receiver : trade.initiator;
       await emailService.sendTradeNotification(notified, notifier, 'completed');
+      
+      await notificationController.createNotification(req.app, {
+        recipient: notified._id,
+        sender: notifier._id,
+        type: 'trade_update',
+        content: `Trade completed! Please rate your experience with ${notifier.username}`,
+        link: `/trades/${trade._id}`,
+        relatedId: trade._id
+      });
+
+      // Update user stats
+      const users = await User.find({ _id: { $in: [trade.initiator._id, trade.receiver._id] } });
+      for (let u of users) {
+        u.completedTrades += 1;
+        u.trustScore = calculateTrustScore(u);
+        await u.save();
+      }
     }
 
     // Release items when cancelled
@@ -165,6 +215,14 @@ exports.updateTradeStatus = async (req, res, next) => {
         { _id: { $in: [...trade.offeredItems, ...trade.requestedItems] }, status: 'in_trade' },
         { status: 'available' }
       );
+      
+      // Penalty for cancellation if it was already accepted
+      if (trade.status === 'accepted') {
+        const canceller = await User.findById(userId);
+        canceller.cancelledTrades += 1;
+        canceller.trustScore = calculateTrustScore(canceller);
+        await canceller.save();
+      }
     }
 
     await trade.save();
@@ -219,8 +277,17 @@ exports.rateTrade = async (req, res, next) => {
     const ratedUser = await User.findById(ratedUserId);
     ratedUser.totalRatings += 1;
     ratedUser.ratingSum += score;
-    ratedUser.trustScore = parseFloat((ratedUser.ratingSum / ratedUser.totalRatings).toFixed(1));
+    ratedUser.trustScore = calculateTrustScore(ratedUser);
     await ratedUser.save();
+
+    await notificationController.createNotification(req.app, {
+      recipient: ratedUserId,
+      sender: req.user._id,
+      type: 'new_rating',
+      content: `${req.user.username} gave you a ${score}-star rating`,
+      link: `/profile`,
+      relatedId: trade._id
+    });
 
     res.status(201).json(rating);
   } catch (err) {

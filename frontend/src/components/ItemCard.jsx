@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Tag, Star, ArrowRight, Brain } from 'lucide-react';
+import { Tag, Star, ArrowRight, Brain, Flag } from 'lucide-react';
 import WorthCheckModal from './WorthCheckModal';
+import ReportModal from './ReportModal';
 import { getImageUrl } from '../lib/utils';
 
 export default function ItemCard({ item, showOwner = true }) {
   const [showAI, setShowAI] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   const placeholder = 'data:image/svg+xml,' + encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" fill="%2312121e"><rect width="400" height="300"/><text x="50%" y="50%" fill="%233c3c52" font-size="14" text-anchor="middle" dy=".3em" font-family="system-ui">No Image</text></svg>'
@@ -20,6 +22,10 @@ export default function ItemCard({ item, showOwner = true }) {
           <button onClick={e => { e.preventDefault(); e.stopPropagation(); setShowAI(true); }}
             className="ic-ai-btn" title="Verify with AI" aria-label={`Worth check for ${item.title}`}>
             <Brain size={12} /> Worth Check
+          </button>
+          <button onClick={e => { e.preventDefault(); e.stopPropagation(); setShowReport(true); }}
+            className="ic-report-btn" title="Report Item">
+            <Flag size={12} />
           </button>
           <div className="ic-pts-overlay">{item.swapPointValue} pts</div>
         </div>
@@ -54,6 +60,7 @@ export default function ItemCard({ item, showOwner = true }) {
       </Link>
 
       {showAI && <WorthCheckModal item={item} onClose={() => setShowAI(false)} />}
+      {showReport && <ReportModal targetType="Item" targetId={item._id} targetName={item.title} onClose={() => setShowReport(false)} />}
 
       <style>{`
         /* ═══ ItemCard — Interaction Rules ═══
@@ -88,6 +95,17 @@ export default function ItemCard({ item, showOwner = true }) {
           color: var(--color-accent-light);
           border: 1px solid rgba(245,158,11,0.15);
         }
+        
+        .ic-report-btn {
+          position: absolute; top: var(--space-3); left: var(--space-3);
+          background: rgba(18, 18, 30, 0.6); backdrop-filter: blur(8px);
+          border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm);
+          width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+          color: var(--color-text-ghost); cursor: pointer; z-index: 5;
+          opacity: 0; transition: all 0.2s ease;
+        }
+        .ic-card:hover .ic-report-btn { opacity: 1; }
+        .ic-report-btn:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
 
         /* AI Button — reveals on hover, inverts on own hover */
         .ic-ai-btn {
@@ -100,20 +118,20 @@ export default function ItemCard({ item, showOwner = true }) {
           font-size: var(--text-xs); font-weight: 700;
           display: flex; align-items: center; gap: var(--space-1);
           cursor: pointer; z-index: 5;
-          opacity: 0; transform: translateY(4px);
+          opacity: 1; transform: translateY(0);
           transition: opacity var(--duration-base) var(--ease-out),
                       transform var(--duration-base) var(--ease-out),
                       background var(--duration-fast) var(--ease-smooth),
                       color var(--duration-fast) var(--ease-smooth);
           -webkit-tap-highlight-color: transparent;
         }
-        .ic-card:hover .ic-ai-btn { opacity: 1; transform: translateY(0); }
+
         .ic-ai-btn:hover {
           background: #a78bfa; color: #fff; border-color: #a78bfa;
           box-shadow: 0 4px 16px rgba(167,139,250,0.25);
         }
         .ic-ai-btn:active { transform: scale(0.95); }
-        @media (hover: none) { .ic-ai-btn { opacity: 1; transform: translateY(0); } }
+
 
         /* Body */
         .ic-body { padding: var(--space-4) var(--space-5) var(--space-5); }

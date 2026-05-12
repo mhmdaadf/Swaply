@@ -1,14 +1,21 @@
 import { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
-import { Send, Star, CheckCircle, XCircle, ArrowRightLeft } from 'lucide-react';
+import { 
+  Send, Star, CheckCircle, XCircle, ArrowRightLeft, 
+  MessageSquare, Shield, Clock, AlertTriangle, Sparkles,
+  Loader2, Info
+} from 'lucide-react';
 import { getImageUrl } from '../lib/utils';
+import FairnessGauge from '../components/FairnessGauge';
 
 export default function TradeDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuthStore();
+  
   const [trade, setTrade] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -16,252 +23,420 @@ export default function TradeDetail() {
   const [ratingComment, setRatingComment] = useState('');
   const [hasRated, setHasRated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  
   const bottomRef = useRef(null);
   const socketRef = useRef(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [t, m] = await Promise.all([api.get(`/trades/${id}`), api.get(`/trades/${id}/messages`)]);
-        setTrade(t.data); setMessages(m.data);
-      } catch (err) { console.error(err); }
-      finally { setLoading(false); }
+        const [t, m] = await Promise.all([
+          api.get(`/trades/${id}`),
+          api.get(`/trades/${id}/messages`)
+        ]);
+        setTrade(t.data);
+        setMessages(m.data);
+      } catch (err) {
+        console.error(err);
+        navigate('/trades');
+      } finally {
+        setLoading(false);
+      }
     };
     load();
-    const socket = io({ transports: ['websocket'] });
+
+    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000');
     socket.emit('join_trade', id);
     socket.on('new_message', (msg) => setMessages(prev => [...prev, msg]));
+    
     socketRef.current = socket;
-    return () => { socket.emit('leave_trade', id); socket.disconnect(); };
+    return () => {
+      socket.emit('leave_trade', id);
+      socket.disconnect();
+    };
   }, [id]);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-    try { await api.post(`/trades/${id}/messages`, { content: input }); setInput(''); } catch (err) { console.error(err); }
+    try {
+      await api.post(`/trades/${id}/messages`, { content: input });
+      setInput('');
+    } catch (err) { console.error(err); }
   };
+
   const updateStatus = async (status) => {
-    try { const { data } = await api.patch(`/trades/${id}/status`, { status }); setTrade(data); } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+    setSubmitting(true);
+    try {
+      const { data } = await api.patch(`/trades/${id}/status`, { status });
+      setTrade(data);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update trade status');
+    } finally {
+      setSubmitting(false);
+    }
   };
+
   const submitRating = async () => {
-    try { await api.post(`/trades/${id}/rate`, { score: rating, comment: ratingComment }); setHasRated(true); } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+    try {
+      await api.post(`/trades/${id}/rate`, { score: rating, comment: ratingComment });
+      setHasRated(true);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to submit rating');
+    }
   };
 
-  if (loading) return <div className="page-container" style={{ paddingTop: 'calc(var(--nav-height) + var(--space-8))' }}><div className="skeleton" style={{ height: 400 }} /></div>;
-  if (!trade) return null;
-
-  const isInit = trade.initiator._id === user._id;
-  const other = isInit ? trade.receiver : trade.initiator;
-  const canChat = trade.status !== 'completed' && trade.status !== 'cancelled';
-
-  const ItemRow = ({ item }) => (
-    <div className="td-item-row">
-      <div className="td-item-thumb">
-        <img src={getImageUrl(item.images?.[0]) || 'https://via.placeholder.com/40'} alt="" />
-      </div>
-      <div>
-        <p className="td-item-title">{item.title}</p>
-        <p className="td-item-pts">{item.swapPointValue} pts</p>
-      </div>
+  if (loading) return (
+    <div className="page-container" style={{ paddingTop: '100px', textAlign: 'center' }}>
+      <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto', color: 'var(--color-brand-light)' }} />
     </div>
   );
+  if (!trade) return null;
+
+  const isInit = trade.initiator?._id === user?._id;
+  const other = isInit ? trade.receiver : trade.initiator;
+  const canChat = trade.status !== 'completed' && trade.status !== 'cancelled';
+  
+  const myItems = (isInit ? trade.offeredItems : trade.requestedItems) || [];
+  const theirItems = (isInit ? trade.requestedItems : trade.offeredItems) || [];
+  
+  const myVal = Array.isArray(myItems) ? myItems.reduce((s, i) => s + (i?.swapPointValue || 0), 0) : 0;
+  const theirVal = Array.isArray(theirItems) ? theirItems.reduce((s, i) => s + (i?.swapPointValue || 0), 0) : 0;
+
+  const ItemCard = ({ item }) => {
+    if (!item) return null;
+    return (
+      <div className="td-item-mini">
+        <img src={getImageUrl(item.images?.[0])} alt="" />
+        <div className="td-item-mini-info">
+          <p>{item.title || 'Untitled Item'}</p>
+          <span>{item.swapPointValue || 0} pts</span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="page-container fade-in" style={{ paddingTop: 'calc(var(--nav-height) + var(--space-8))' }}>
-      <div className="td-grid">
-        {/* Left: Trade Info */}
-        <div>
-          <div className="card td-info-card">
-            <div className="td-info-header">
-              <div className="td-info-user">
-                <div className="td-avatar">{other.username?.charAt(0).toUpperCase()}</div>
-                <div>
-                  <h2 className="td-info-name">Trade with {other.username}</h2>
-                  <div className="td-info-trust">
-                    <Star size={11} className="star-filled" fill="var(--color-accent)" />
-                    <span>{other.trustScore?.toFixed(1)}</span>
+      {/* Header Info */}
+      <div className="td-header">
+        <div className="td-header-left">
+          <div className="td-user-pill">
+            <div className="td-avatar">{other?.username?.charAt(0).toUpperCase() || '?'}</div>
+            <div>
+              <h3>Trade with {other?.username || 'User'}</h3>
+              <div className="td-trust">
+                <Star size={12} fill="var(--color-accent)" color="var(--color-accent)" />
+                <span>{(other?.trustScore || 0).toFixed(1)} Trust Score</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="td-header-right">
+          <div className={`td-status-tag ${trade.status}`}>
+            {trade.status === 'pending' && <Clock size={14} />}
+            {trade.status === 'accepted' && <CheckCircle size={14} />}
+            {trade.status === 'completed' && <Sparkles size={14} />}
+            {trade.status === 'cancelled' && <XCircle size={14} />}
+            {trade.status}
+          </div>
+        </div>
+      </div>
+
+      <div className="td-main-grid">
+        {/* Left Side: Items & Fairness */}
+        <div className="td-trade-summary">
+          <div className="td-comparison glass">
+            <div className="td-comp-col">
+              <h4>Your Items</h4>
+              <div className="td-items-stack">
+                {myItems.map(i => <ItemCard key={i._id} item={i} />)}
+              </div>
+              <div className="td-comp-total">Total: {myVal} pts</div>
+            </div>
+            
+            <div className="td-comp-vs">
+              <ArrowRightLeft size={20} />
+            </div>
+            
+            <div className="td-comp-col">
+              <h4>Their Items</h4>
+              <div className="td-items-stack">
+                {theirItems.map(i => <ItemCard key={i._id} item={i} />)}
+              </div>
+              <div className="td-comp-total">Total: {theirVal} pts</div>
+            </div>
+          </div>
+
+          <FairnessGauge myValue={isInit ? myVal : theirVal} theirValue={isInit ? theirVal : myVal} />
+
+          {/* Actions Panel */}
+          <div className="td-actions-panel card">
+            <div className="td-actions-content">
+              {trade.status === 'pending' && !isInit && (
+                <div className="td-action-prompt">
+                  <p>Would you like to accept this trade proposal?</p>
+                  <div className="td-btn-group">
+                    <button className="btn btn-success" onClick={() => updateStatus('accepted')} disabled={submitting}>
+                      <CheckCircle size={16} /> Accept Trade
+                    </button>
+                    <button className="btn btn-danger-outline" onClick={() => updateStatus('cancelled')} disabled={submitting}>
+                      <XCircle size={16} /> Reject
+                    </button>
                   </div>
                 </div>
-              </div>
-              <span className={`badge ${trade.status === 'completed' ? 'badge-success' : trade.status === 'cancelled' ? 'badge-error' : trade.status === 'accepted' ? 'badge-brand' : 'badge-accent'}`}>
-                {trade.status}
-              </span>
-            </div>
-
-            <div className="td-items-section">
-              <p className="td-items-label">Offered Items</p>
-              {trade.offeredItems.map(i => <ItemRow key={i._id} item={i} />)}
-            </div>
-            <div className="td-items-section" style={{ borderTop: '1px solid var(--color-border)', paddingTop: 'var(--space-5)' }}>
-              <p className="td-items-label">Requested Items</p>
-              {trade.requestedItems.map(i => <ItemRow key={i._id} item={i} />)}
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="td-actions">
-            {trade.status === 'pending' && !isInit && (
-              <button className="btn btn-success" onClick={() => updateStatus('accepted')}><CheckCircle size={15} /> Accept</button>
-            )}
-            {trade.status === 'pending' && (
-              <button className="btn btn-danger" onClick={() => updateStatus('cancelled')}><XCircle size={15} /> Cancel</button>
-            )}
-            {trade.status === 'accepted' && (
-              <>
-                <button className="btn btn-accent" onClick={() => updateStatus('completed')}><ArrowRightLeft size={15} /> Complete Trade</button>
-                <button className="btn btn-danger" onClick={() => updateStatus('cancelled')}><XCircle size={15} /> Cancel</button>
-              </>
-            )}
-          </div>
-
-          {/* Rating */}
-          {trade.status === 'completed' && !hasRated && (
-            <div className="card td-rating-card">
-              <p className="td-rating-title">Rate this trade</p>
-              <div className="td-stars">
-                {[1,2,3,4,5].map(s => (
-                  <button key={s} onClick={() => setRating(s)} className="td-star-btn">
-                    <Star size={22} fill={s <= rating ? 'var(--color-accent)' : 'none'}
-                      className={s <= rating ? 'star-filled' : 'star-empty'} />
+              )}
+              
+              {trade.status === 'pending' && isInit && (
+                <div className="td-action-prompt">
+                  <p>Awaiting response from {other.username}...</p>
+                  <button className="btn btn-danger-outline" onClick={() => updateStatus('cancelled')} disabled={submitting}>
+                    <XCircle size={16} /> Cancel Proposal
                   </button>
-                ))}
-              </div>
-              <textarea className="input" placeholder="Optional comment..." value={ratingComment}
-                onChange={e => setRatingComment(e.target.value)} style={{ minHeight: 60, marginBottom: 'var(--space-3)' }} />
-              <button className="btn btn-primary" disabled={rating === 0} onClick={submitRating}>Submit Rating</button>
+                </div>
+              )}
+
+              {trade.status === 'accepted' && (
+                <div className="td-action-prompt">
+                  <div className="td-accepted-notice">
+                    <CheckCircle size={24} color="var(--color-success)" />
+                    <div>
+                      <p><strong>Trade Accepted!</strong></p>
+                      <p>Coordinate with {other.username} to complete the physical swap.</p>
+                    </div>
+                  </div>
+                  <div className="td-btn-group">
+                    <button className="btn btn-accent" onClick={() => updateStatus('completed')} disabled={submitting}>
+                      <Sparkles size={16} /> Mark as Completed
+                    </button>
+                    <button className="btn btn-danger-outline" onClick={() => updateStatus('cancelled')} disabled={submitting}>
+                      <XCircle size={16} /> Cancel Trade
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {trade.status === 'completed' && !hasRated && (
+                <div className="td-rating-box fade-in">
+                  <h4>Rate your experience</h4>
+                  <div className="td-rating-stars">
+                    {[1,2,3,4,5].map(s => (
+                      <button key={s} onClick={() => setRating(s)} className="td-star-btn">
+                        <Star size={24} fill={s <= rating ? 'var(--color-accent)' : 'none'}
+                          color={s <= rating ? 'var(--color-accent)' : 'var(--color-text-ghost)'} />
+                      </button>
+                    ))}
+                  </div>
+                  <textarea 
+                    className="input" 
+                    placeholder="Tell others about your experience..." 
+                    value={ratingComment}
+                    onChange={e => setRatingComment(e.target.value)} 
+                  />
+                  <button className="btn btn-primary" style={{ marginTop: 12, width: '100%' }} disabled={rating === 0} onClick={submitRating}>
+                    Submit Review
+                  </button>
+                </div>
+              )}
+              
+              {hasRated && (
+                <div className="td-rating-success">
+                  <CheckCircle size={20} color="var(--color-success)" />
+                  <p>Review submitted! Thank you for keeping Swaply safe.</p>
+                </div>
+              )}
+
+              {trade.status === 'cancelled' && (
+                <div className="td-cancelled-box">
+                  <XCircle size={24} color="var(--color-error)" />
+                  <p>This trade has been cancelled.</p>
+                  <button className="btn btn-ghost btn-sm" onClick={() => navigate('/explore')}>Explore more items</button>
+                </div>
+              )}
             </div>
-          )}
-          {hasRated && (
-            <div className="card" style={{ padding: 'var(--space-5)', textAlign: 'center', marginTop: 'var(--space-4)' }}>
-              <CheckCircle size={20} style={{ color: 'var(--color-success)', margin: '0 auto var(--space-2)' }} />
-              <p style={{ color: 'var(--color-success)', fontWeight: 600, fontSize: 'var(--text-base)' }}>Rating submitted</p>
-            </div>
-          )}
+          </div>
         </div>
 
-        {/* Right: Chat */}
-        <div className="card td-chat">
+        {/* Right Side: Chat System */}
+        <div className="td-chat-panel card">
           <div className="td-chat-header">
-            <span className="pulse-dot" />
-            Chat
+            <MessageSquare size={18} color="var(--color-brand-light)" />
+            <h3>Negotiation Chat</h3>
           </div>
-          <div className="td-chat-messages">
-            {messages.length === 0 && <p className="td-chat-empty">No messages yet. Start the conversation!</p>}
+          
+          <div className="td-chat-history">
+            {messages.length === 0 && (
+              <div className="td-chat-empty">
+                <Info size={32} opacity={0.2} />
+                <p>Start the conversation with {other.username}</p>
+              </div>
+            )}
             {messages.map((msg, idx) => {
-              const isMe = msg.sender?._id === user._id || msg.sender === user._id;
+              if (!msg) return null;
+              const senderId = msg.sender?._id || msg.sender;
+              const isMe = senderId === user?._id;
+              let timeStr = '';
+              try { 
+                if (msg.createdAt) timeStr = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              } catch(e) {}
+
               return (
-                <div key={idx} className={`td-msg ${isMe ? 'td-msg-me' : 'td-msg-them'}`}>
-                  <div className="td-msg-bubble">
-                    {!isMe && <p className="td-msg-sender">{msg.sender?.username}</p>}
-                    <p>{msg.content}</p>
+                <div key={idx} className={`td-msg ${isMe ? 'me' : 'them'}`}>
+                  <div className="td-msg-bubble shadow-sm">
+                    {!isMe && <p className="td-msg-name">{msg.sender?.username || 'User'}</p>}
+                    <p className="td-msg-text">{msg.content}</p>
+                    <span className="td-msg-time">{timeStr}</span>
                   </div>
                 </div>
               );
             })}
             <div ref={bottomRef} />
           </div>
+
           {canChat && (
-            <form onSubmit={sendMessage} className="td-chat-input">
-              <input className="input" placeholder="Type a message..." value={input}
-                onChange={e => setInput(e.target.value)} style={{ flex: 1 }} />
-              <button type="submit" className="btn btn-primary btn-sm"><Send size={14} /></button>
+            <form onSubmit={sendMessage} className="td-chat-input-wrap">
+              <input 
+                className="input" 
+                placeholder="Suggest an adjustment or coordinate meet-up..." 
+                value={input}
+                onChange={e => setInput(e.target.value)} 
+              />
+              <button type="submit" className="btn btn-primary btn-icon" disabled={!input.trim()}>
+                <Send size={16} />
+              </button>
             </form>
           )}
         </div>
       </div>
 
       <style>{`
-        /* ═══ TradeDetail — Interaction Rules ═══
-           Trade info card: static, no hover (informational)
-           Chat input: standard focus ring
-           Messages: smooth scrolling */
-        .td-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); align-items: start; }
-
-        .td-info-card { padding: var(--space-6); }
-        .td-info-header {
+        .td-header {
           display: flex; justify-content: space-between; align-items: center;
-          margin-bottom: var(--space-6);
+          margin-bottom: var(--space-8);
         }
-        .td-info-user { display: flex; align-items: center; gap: var(--space-3); }
+        .td-user-pill { display: flex; align-items: center; gap: 12px; }
         .td-avatar {
-          width: 42px; height: 42px; border-radius: 50%;
+          width: 48px; height: 48px; border-radius: 50%;
           background: linear-gradient(135deg, var(--color-brand), var(--color-accent));
           display: flex; align-items: center; justify-content: center;
-          font-weight: 700; color: #fff; font-size: var(--text-md);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+          color: #fff; font-weight: 800; font-size: 1.2rem;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        .td-info-name { font-size: var(--text-lg); font-weight: 600; }
-        .td-info-trust {
-          display: flex; align-items: center; gap: var(--space-1);
-          font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: 2px;
+        .td-header h3 { margin: 0; font-size: 1.2rem; font-weight: 700; }
+        .td-trust { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--color-text-ghost); }
+        
+        .td-status-tag {
+          display: flex; align-items: center; gap: 6px; padding: 6px 14px;
+          border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 700;
+          text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .td-status-tag.pending { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .td-status-tag.accepted { background: rgba(34,197,94,0.1); color: #22c55e; }
+        .td-status-tag.completed { background: rgba(167,139,250,0.1); color: #a78bfa; }
+        .td-status-tag.cancelled { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+        .td-main-grid {
+          display: grid; grid-template-columns: 1fr 400px; gap: var(--space-8);
+          align-items: start;
         }
 
-        .td-items-section { margin-bottom: var(--space-5); }
-        .td-items-label {
-          font-size: var(--text-sm); color: var(--color-text-muted); font-weight: 600;
-          margin-bottom: var(--space-3); text-transform: uppercase; letter-spacing: 0.04em;
+        .td-comparison {
+          display: grid; grid-template-columns: 1fr 50px 1fr;
+          padding: var(--space-6); border-radius: var(--radius-xl);
+          border: 1px solid var(--color-border); background: rgba(255,255,255,0.02);
+          margin-bottom: var(--space-6);
         }
-        .td-item-row { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
-        .td-item-thumb {
-          width: 40px; height: 40px; border-radius: var(--radius-sm);
-          background: var(--color-surface-2); overflow: hidden;
-          border: 1px solid var(--color-border-subtle); flex-shrink: 0;
+        .td-comp-col { display: flex; flex-direction: column; gap: 12px; }
+        .td-comp-col h4 { font-size: 0.85rem; text-transform: uppercase; color: var(--color-text-ghost); margin: 0; }
+        .td-items-stack { display: flex; flex-direction: column; gap: 8px; }
+        .td-item-mini {
+          display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03);
+          padding: 8px; border-radius: var(--radius-md); border: 1px solid var(--color-border-subtle);
         }
-        .td-item-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .td-item-title { font-size: var(--text-base); font-weight: 500; }
-        .td-item-pts { font-size: var(--text-sm); color: var(--color-accent); font-weight: 600; }
+        .td-item-mini img { width: 36px; height: 36px; border-radius: 4px; object-fit: cover; }
+        .td-item-mini-info p { font-size: 0.8rem; font-weight: 600; margin: 0; }
+        .td-item-mini-info span { font-size: 0.7rem; color: var(--color-accent-light); }
+        .td-comp-total { font-size: 0.9rem; font-weight: 700; margin-top: 8px; border-top: 1px solid var(--color-border-subtle); padding-top: 8px; }
+        .td-comp-vs { display: flex; align-items: center; justify-content: center; color: var(--color-text-ghost); opacity: 0.3; }
 
-        .td-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-4); }
+        .td-actions-panel { padding: var(--space-6); border-radius: var(--radius-xl); }
+        .td-action-prompt { text-align: center; }
+        .td-action-prompt p { margin-bottom: 20px; color: var(--color-text-secondary); }
+        .td-btn-group { display: flex; gap: 12px; justify-content: center; }
+        
+        .td-accepted-notice {
+          display: flex; align-items: center; gap: 16px; text-align: left;
+          background: rgba(34,197,94,0.05); padding: 16px; border-radius: var(--radius-lg);
+          margin-bottom: 20px; border: 1px solid rgba(34,197,94,0.1);
+        }
+        .td-accepted-notice p { margin: 0; color: #fff; }
+        .td-accepted-notice p:last-child { font-size: 0.85rem; color: var(--color-text-secondary); margin-top: 4px; }
 
-        .td-rating-card { padding: var(--space-5); margin-top: var(--space-4); }
-        .td-rating-title { font-weight: 600; margin-bottom: var(--space-3); }
-        .td-stars { display: flex; gap: var(--space-1); margin-bottom: var(--space-3); }
-        .td-star-btn { background: none; border: none; cursor: pointer; padding: 2px; transition: transform var(--duration-fast); }
-        .td-star-btn:active { transform: scale(0.9); }
+        .td-rating-box h4 { margin-bottom: 16px; }
+        .td-rating-stars { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
+        .td-star-btn { background: none; border: none; cursor: pointer; transition: transform 0.1s; }
+        .td-star-btn:hover { transform: scale(1.1); }
+        .td-rating-success { text-align: center; color: var(--color-success); font-weight: 600; padding: 20px; }
 
-        /* Chat */
-        .td-chat { display: flex; flex-direction: column; height: calc(100vh - 280px); min-height: 400px; max-height: 600px; overflow: hidden; }
+        .td-cancelled-box { text-align: center; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+        /* Chat System */
+        .td-chat-panel {
+          display: flex; flex-direction: column; height: 600px;
+          border-radius: var(--radius-xl); overflow: hidden;
+        }
         .td-chat-header {
-          padding: var(--space-4) var(--space-5);
-          border-bottom: 1px solid var(--color-border);
-          font-weight: 600; font-size: var(--text-base);
-          display: flex; align-items: center; gap: var(--space-2);
+          padding: 16px 20px; border-bottom: 1px solid var(--color-border-subtle);
+          display: flex; align-items: center; gap: 12px;
         }
-        .td-chat-messages {
-          flex: 1; overflow-y: auto; padding: var(--space-4);
-          display: flex; flex-direction: column; gap: var(--space-2);
+        .td-chat-header h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+        
+        .td-chat-history {
+          flex: 1; overflow-y: auto; padding: 20px;
+          display: flex; flex-direction: column; gap: 12px;
+          background: rgba(0,0,0,0.05);
         }
-        .td-chat-empty {
-          color: var(--color-text-ghost); text-align: center;
-          margin-top: var(--space-10); font-size: var(--text-base);
-        }
-        .td-msg { display: flex; }
-        .td-msg-me { justify-content: flex-end; }
-        .td-msg-them { justify-content: flex-start; }
+        .td-msg { display: flex; width: 100%; }
+        .td-msg.me { justify-content: flex-end; }
+        .td-msg.them { justify-content: flex-start; }
+        
         .td-msg-bubble {
-          max-width: 70%; padding: var(--space-2) var(--space-4);
-          border-radius: var(--radius); font-size: var(--text-base); line-height: 1.5;
+          max-width: 85%; padding: 10px 14px; border-radius: 14px;
+          position: relative;
         }
-        .td-msg-me .td-msg-bubble {
+        .td-msg.me .td-msg-bubble {
           background: var(--color-brand); color: #fff;
-          border-bottom-right-radius: var(--radius-xs);
+          border-bottom-right-radius: 2px;
         }
-        .td-msg-them .td-msg-bubble {
-          background: var(--color-surface-2); color: var(--color-text-primary);
-          border-bottom-left-radius: var(--radius-xs);
+        .td-msg.them .td-msg-bubble {
+          background: var(--color-surface-3); color: #fff;
+          border-bottom-left-radius: 2px;
         }
-        .td-msg-sender { font-size: var(--text-xs); font-weight: 600; color: var(--color-brand-light); margin-bottom: 2px; }
+        .td-msg-name { font-size: 0.7rem; font-weight: 700; color: var(--color-brand-light); margin-bottom: 4px; }
+        .td-msg-text { font-size: 0.9rem; margin: 0; line-height: 1.5; }
+        .td-msg-time { font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 4px; display: block; text-align: right; }
 
-        .td-chat-input {
-          display: flex; gap: var(--space-2); padding: var(--space-3);
-          border-top: 1px solid var(--color-border);
+        .td-chat-input-wrap {
+          padding: 16px; border-top: 1px solid var(--color-border-subtle);
+          display: flex; gap: 10px;
         }
+        .btn-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0; flex-shrink: 0; }
 
-        @media (max-width: 768px) {
-          .td-grid { grid-template-columns: 1fr; }
-          .td-chat { height: 500px; }
+        @media (max-width: 1024px) {
+          .td-main-grid { grid-template-columns: 1fr; }
+          .td-chat-panel { height: 500px; }
+        }
+        
+        @media (max-width: 600px) {
+          .td-comparison { grid-template-columns: 1fr; gap: 20px; text-align: center; }
+          .td-comp-vs { transform: rotate(90deg); }
+          .td-btn-group { flex-direction: column; }
+          .btn { width: 100%; }
         }
       `}</style>
     </div>

@@ -51,10 +51,31 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  completedTrades: {
+    type: Number,
+    default: 0,
+  },
+  cancelledTrades: {
+    type: Number,
+    default: 0,
+  },
   wishlistCategories: [{
     type: String,
     trim: true,
   }],
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'superadmin'],
+    default: 'user',
+  },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 }, { timestamps: true });

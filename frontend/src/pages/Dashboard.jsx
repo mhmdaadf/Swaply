@@ -5,6 +5,8 @@ import { useAuthStore } from '../store/authStore';
 import ItemCard from '../components/ItemCard';
 import TrustBadge from '../components/TrustBadge';
 import ListingWizard from '../components/ListingWizard';
+import { SkeletonCard } from '../components/Skeleton';
+import EmptyState from '../components/EmptyState';
 import { Package, ArrowRightLeft, Sparkles, TrendingUp, PlusCircle, Wand2 } from 'lucide-react';
 
 const STAT_CARDS = [
@@ -53,7 +55,7 @@ export default function Dashboard() {
         <div>
           <p className="dash-greeting">Welcome back</p>
           <h1 className="page-title">{user?.username}</h1>
-          <div style={{ marginTop: 'var(--space-3)' }}><TrustBadge score={user?.trustScore} /></div>
+          <div style={{ marginTop: 'var(--space-3)' }}><TrustBadge score={user?.trustScore} isVerified={user?.isVerified} /></div>
         </div>
         <div className="dash-actions">
           <button className="btn dash-ai-btn" onClick={() => setShowWizard(true)}>
@@ -87,17 +89,16 @@ export default function Dashboard() {
         <h2 className="section-title">My Listings</h2>
         {loading ? (
           <div className="dash-grid">
-            {[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: 320 }} />)}
+            {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
           </div>
         ) : myItems.length === 0 ? (
-          <div className="card empty-state">
-            <div className="empty-state-icon">
-              <Package size={28} style={{ color: 'var(--color-text-muted)' }} />
-            </div>
-            <p className="empty-state-title">No listings yet</p>
-            <p className="empty-state-desc">List your first item to start swapping with the community</p>
-            <Link to="/items/new" className="btn btn-primary">List Your First Item</Link>
-          </div>
+          <EmptyState 
+            type="items" 
+            title="No listings yet" 
+            desc="List your first item to start swapping with the community." 
+            actionLabel="List Your First Item" 
+            actionLink="/items/new" 
+          />
         ) : (
           <div className="dash-grid">
             {myItems.map(item => <ItemCard key={item._id} item={item} showOwner={false} />)}

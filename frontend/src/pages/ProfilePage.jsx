@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../lib/api';
 import TrustBadge from '../components/TrustBadge';
+import RatingDistribution from '../components/RatingDistribution';
+import ReviewList from '../components/ReviewList';
 import { User, Mail, Calendar, Package, ArrowRightLeft, Star, Heart, LogOut, Edit3, Check, X, Loader2, Shield } from 'lucide-react';
 
 const CATEGORIES = ['Electronics','Books','Clothing','Furniture','Sports','Toys','Music','Art','Tools','Automotive','Collectibles','Other'];
@@ -15,18 +17,27 @@ export default function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [reviewsData, setReviewsData] = useState({ ratings: [], distribution: {}, total: 0 });
   const [form, setForm] = useState({ username: '', email: '', wishlistCategories: [] });
+  const [myItems, setMyItems] = useState([]);
+  const [itemsLoading, setItemsLoading] = useState(true);
 
   useEffect(() => {
     if (user) setForm({ username: user.username||'', email: user.email||'', wishlistCategories: user.wishlistCategories||[] });
     const loadStats = async () => {
       try {
-        const [i, t] = await Promise.all([api.get('/items/my'), api.get('/trades')]);
+        const [i, t, r] = await Promise.all([
+          api.get('/items/my'), 
+          api.get('/trades'),
+          api.get(`/ratings/user/${user._id}`)
+        ]);
         setStats({ items: i.data.length, trades: t.data.length });
+        setMyItems(i.data);
+        setReviewsData(r.data);
       } catch (err) { console.error(err); }
-      finally { setLoading(false); }
+      finally { setLoading(false); setItemsLoading(false); }
     };
-    loadStats();
+    if (user) loadStats();
   }, [user]);
 
   const handleLogout = () => { logout(); navigate('/login'); };
@@ -136,7 +147,7 @@ export default function ProfilePage() {
           <div className="pf-trust-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-3)' }}>
               <span style={{ fontSize: 'var(--text-base)', fontWeight: 600 }}>Trust Score</span>
-              <TrustBadge score={user.trustScore} />
+              <TrustBadge score={user.trustScore} isVerified={user.isVerified} />
             </div>
             <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
               Based on {user.totalRatings || 0} community ratings. Maintain a high score by completing fair trades.
@@ -155,7 +166,54 @@ export default function ProfilePage() {
               <p className="pf-stat-label">Trades</p>
             </div>
           </div>
+
+          <div style={{ marginTop: 'var(--space-6)' }}>
+            <p className="pf-field-label" style={{ marginBottom: 12 }}>Review Distribution</p>
+            <RatingDistribution distribution={reviewsData.distribution} total={reviewsData.total} />
+          </div>
         </div>
+      </div>
+
+      {/* My Items Section */}
+      <div className="card pf-section" style={{ marginTop: 'var(--space-6)' }}>
+        <div className="pf-section-header">
+          <Package size={16} style={{ color: 'var(--color-brand-light)' }} />
+          <h2>My Listings</h2>
+        </div>
+        {itemsLoading ? (
+          <div style={{ padding: '40px', textAlign: 'center' }}><Loader2 className="animate-spin" /></div>
+        ) : myItems.length === 0 ? (
+          <div className="pf-empty-items">
+            <Package size={32} opacity={0.2} />
+            <p>You haven't listed any items yet.</p>
+            <button className="btn btn-primary btn-sm" onClick={() => navigate('/list')}>List New Item</button>
+          </div>
+        ) : (
+          <div className="pf-items-grid">
+            {myItems.map(item => (
+              <div key={item._id} className="pf-item-wrapper">
+                <img src={getImageUrl(item.images?.[0])} alt={item.title} />
+                <div className="pf-item-info">
+                  <p className="pf-item-title">{item.title}</p>
+                  <div className="pf-item-meta">
+                    <span className={`badge badge-sm ${item.status === 'available' ? 'badge-brand' : 'badge-neutral'}`}>{item.status}</span>
+                    <span>{item.swapPointValue} pts</span>
+                  </div>
+                </div>
+                <button className="pf-item-action" onClick={() => navigate(`/items/${item._id}`)}>View</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Feedback Section */}
+      <div className="card pf-section" style={{ marginTop: 'var(--space-6)' }}>
+        <div className="pf-section-header">
+          <Star size={16} style={{ color: 'var(--color-accent)' }} />
+          <h2>Community Feedback</h2>
+        </div>
+        <ReviewList reviews={reviewsData.ratings} />
       </div>
 
       {/* Wishlist */}
@@ -251,6 +309,21 @@ export default function ProfilePage() {
           background: rgba(99,102,241,0.1); color: var(--color-brand-light);
           border-color: rgba(99,102,241,0.25);
         }
+
+        .pf-empty-items { text-align: center; padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--color-text-ghost); }
+        
+        .pf-items-grid { display: flex; flex-direction: column; gap: 12px; }
+        .pf-item-wrapper {
+          display: flex; align-items: center; gap: 16px; padding: 12px;
+          background: rgba(255,255,255,0.03); border-radius: var(--radius-lg);
+          border: 1px solid var(--color-border-subtle);
+        }
+        .pf-item-wrapper img { width: 50px; height: 50px; border-radius: var(--radius-sm); object-fit: cover; }
+        .pf-item-info { flex: 1; }
+        .pf-item-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+        .pf-item-meta { display: flex; align-items: center; gap: 12px; font-size: 0.75rem; color: var(--color-text-ghost); }
+        .pf-item-action { background: none; border: 1px solid var(--color-border); color: var(--color-text-primary); padding: 4px 12px; border-radius: var(--radius-sm); font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+        .pf-item-action:hover { background: var(--color-surface-3); border-color: var(--color-border-hover); }
       `}</style>
     </div>
   );

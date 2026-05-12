@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 import TrustBadge from '../components/TrustBadge';
-import { Tag, ArrowRight, Calendar, DollarSign, Sparkles, ArrowRightLeft } from 'lucide-react';
+import { Tag, ArrowRight, Calendar, DollarSign, Sparkles, ArrowRightLeft, Flag } from 'lucide-react';
+import ReportModal from '../components/ReportModal';
 import { getImageUrl } from '../lib/utils';
 
 export default function ItemDetail() {
@@ -12,6 +13,7 @@ export default function ItemDetail() {
   const navigate = useNavigate();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [reportConfig, setReportConfig] = useState(null);
 
   useEffect(() => {
     api.get(`/items/${id}`).then(r => setItem(r.data)).catch(() => navigate('/explore')).finally(() => setLoading(false));
@@ -29,6 +31,9 @@ export default function ItemDetail() {
         {/* Image */}
         <div className="id-image-wrap">
           <img src={getImageUrl(item.images?.[0]) || placeholder} alt={item.title} loading="lazy" />
+          <button className="id-report-item-btn" onClick={() => setReportConfig({ type: 'Item', id: item._id, name: item.title })}>
+            <Flag size={14} />
+          </button>
         </div>
 
         {/* Details */}
@@ -80,9 +85,12 @@ export default function ItemDetail() {
                 <div className="id-owner-avatar">{item.owner.username?.charAt(0).toUpperCase()}</div>
                 <div>
                   <p className="id-owner-name">{item.owner.username}</p>
-                  <TrustBadge score={item.owner.trustScore} size="sm" />
+                  <TrustBadge score={item.owner.trustScore} isVerified={item.owner.isVerified} size="sm" />
                 </div>
               </div>
+              <button className="id-report-user-btn" onClick={() => setReportConfig({ type: 'User', id: item.owner._id, name: item.owner.username })}>
+                <Flag size={14} /> Report User
+              </button>
             </div>
           )}
 
@@ -96,6 +104,15 @@ export default function ItemDetail() {
         </div>
       </div>
 
+      {reportConfig && (
+        <ReportModal 
+          targetType={reportConfig.type} 
+          targetId={reportConfig.id} 
+          targetName={reportConfig.name} 
+          onClose={() => setReportConfig(null)} 
+        />
+      )}
+
       <style>{`
         .id-grid {
           display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-10);
@@ -104,9 +121,19 @@ export default function ItemDetail() {
         .id-image-wrap {
           border-radius: var(--radius-xl); overflow: hidden;
           background: var(--color-surface-2); aspect-ratio: 4/3;
-          border: 1px solid var(--color-border-subtle);
+          border: 1px solid var(--color-border-subtle); position: relative;
         }
         .id-image-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .id-report-item-btn {
+          position: absolute; bottom: 16px; left: 16px;
+          background: rgba(18, 18, 30, 0.6); backdrop-filter: blur(8px);
+          border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm);
+          padding: 8px 12px; display: flex; align-items: center; justify-content: center;
+          color: var(--color-text-ghost); cursor: pointer; font-size: 0.75rem;
+          transition: all 0.2s ease;
+        }
+        .id-report-item-btn:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
 
         .id-badges { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); flex-wrap: wrap; }
         .id-title { font-size: var(--text-xl); font-weight: 700; margin-bottom: var(--space-3); letter-spacing: -0.02em; }
@@ -147,9 +174,18 @@ export default function ItemDetail() {
         .id-owner-card {
           background: var(--color-surface-2); border: 1px solid var(--color-border);
           border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5);
-          margin-bottom: var(--space-6);
+          margin-bottom: var(--space-6); display: flex; align-items: center; justify-content: space-between;
         }
         .id-owner-info { display: flex; align-items: center; gap: var(--space-3); }
+        
+        .id-report-user-btn {
+          background: none; border: 1px solid var(--color-border);
+          border-radius: var(--radius-sm); padding: 6px 12px;
+          font-size: 0.75rem; color: var(--color-text-ghost);
+          display: flex; align-items: center; gap: 6px; cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .id-report-user-btn:hover { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.05); }
         .id-owner-avatar {
           width: 40px; height: 40px; border-radius: 50%;
           background: linear-gradient(135deg, var(--color-brand), var(--color-accent));

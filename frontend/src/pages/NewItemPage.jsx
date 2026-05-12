@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../lib/api';
-import { Upload, CheckCircle2, Loader2, Wand2, Image, ArrowLeft } from 'lucide-react';
+import { Upload, CheckCircle2, Loader2, Wand2, Image, ArrowLeft, Sparkles } from 'lucide-react';
+import ModerationWarning from '../components/ModerationWarning';
 
 const CATEGORIES = ['Electronics','Books','Clothing','Furniture','Sports','Toys','Music','Art','Tools','Automotive','Collectibles','Other'];
 const CONDITIONS = ['New','Like New','Good','Fair','Poor'];
@@ -14,6 +15,8 @@ export default function NewItemPage() {
   const [estimatedValue, setEstimatedValue] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [moderationAnalysis, setModerationAnalysis] = useState(null);
+  const [moderationConfirmed, setModerationConfirmed] = useState(false);
 
   useEffect(() => {
     if (location.state?.prefill) {
@@ -34,7 +37,44 @@ export default function NewItemPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); setLoading(true); setError('');
+    e.preventDefault(); 
+    setError('');
+
+    // If we haven't checked with AI yet, do it now
+    if (!moderationConfirmed && !moderationAnalysis) {
+      setLoading(true);
+      try {
+        const { data } = await api.post('/items/analyze-moderation', {
+          title: form.title,
+          description: form.description,
+          category: form.category,
+          condition: form.condition,
+          estimatedValue: estimatedValue || 0
+        });
+        
+        setModerationAnalysis(data);
+        if (data.riskLevel === 'Low') {
+          // If low risk, we can just proceed
+          setModerationConfirmed(true);
+          await finalizeSubmit();
+        } else {
+          // If Medium/High, stop and show warning
+          setLoading(false);
+        }
+        return;
+      } catch (err) {
+        console.error('Moderation check failed', err);
+        // Fallback: proceed anyway if AI is down
+        await finalizeSubmit();
+        return;
+      }
+    }
+
+    await finalizeSubmit();
+  };
+
+  const finalizeSubmit = async () => {
+    setLoading(true);
     try {
       const fd = new FormData();
       fd.append('title', form.title); fd.append('description', form.description);
@@ -110,9 +150,22 @@ export default function NewItemPage() {
             </label>
           </div>
 
-          <button type="submit" className="btn btn-primary btn-lg" disabled={loading} style={{ width: '100%', marginTop: 'var(--space-2)' }}>
-            {loading ? <Loader2 size={18} className="animate-spin" /> : <><CheckCircle2 size={18} /> Create Listing</>}
-          </button>
+          {moderationAnalysis && !moderationConfirmed && (
+            <ModerationWarning 
+              analysis={moderationAnalysis} 
+              onConfirm={() => {
+                setModerationConfirmed(true);
+                setTimeout(() => finalizeSubmit(), 100);
+              }}
+              onFix={() => setModerationAnalysis(null)}
+            />
+          )}
+
+          {!moderationAnalysis && (
+            <button type="submit" className="btn btn-primary btn-lg" disabled={loading} style={{ width: '100%', marginTop: 'var(--space-2)' }}>
+              {loading ? <Loader2 size={18} className="animate-spin" /> : <><CheckCircle2 size={18} /> Create Listing</>}
+            </button>
+          )}
         </form>
       </div>
 

@@ -26,6 +26,8 @@ const ContactPage = lazy(() => import('./pages/ContactPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const BlogPage = lazy(() => import('./pages/BlogPage'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const PublicProfile = lazy(() => import('./pages/PublicProfile'));
 
 function PageLoader() {
   return (
@@ -59,32 +61,36 @@ export default function App() {
     <BrowserRouter>
       <Navbar />
       <Suspense fallback={<PageLoader />}>
-        <Routes>
-          <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
-          <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/explore" element={<ProtectedRoute><ExplorePage /></ProtectedRoute>} />
-          <Route path="/items/new" element={<ProtectedRoute><NewItemPage /></ProtectedRoute>} />
-          <Route path="/items/:id" element={<ProtectedRoute><ItemDetail /></ProtectedRoute>} />
-          <Route path="/matches" element={<ProtectedRoute><MatchesPage /></ProtectedRoute>} />
-          <Route path="/trades" element={<ProtectedRoute><TradesPage /></ProtectedRoute>} />
-          <Route path="/trades/new" element={<ProtectedRoute><NewTradePage /></ProtectedRoute>} />
-          <Route path="/trades/:id" element={<ProtectedRoute><TradeDetail /></ProtectedRoute>} />
-          <Route path="/estimator" element={<ProtectedRoute><EstimatorPage /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-          <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
-          <Route path="/reset-password/:token" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
-          
-          {/* Public Static Pages */}
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/blog" element={<BlogPage />} />
+        <div className="page-transition-wrapper">
+          <Routes>
+            <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+            <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/explore" element={<ProtectedRoute><ExplorePage /></ProtectedRoute>} />
+            <Route path="/items/new" element={<ProtectedRoute><NewItemPage /></ProtectedRoute>} />
+            <Route path="/items/:id" element={<ProtectedRoute><ItemDetail /></ProtectedRoute>} />
+            <Route path="/matches" element={<ProtectedRoute><MatchesPage /></ProtectedRoute>} />
+            <Route path="/trades" element={<ProtectedRoute><TradesPage /></ProtectedRoute>} />
+            <Route path="/trades/new" element={<ProtectedRoute><NewTradePage /></ProtectedRoute>} />
+            <Route path="/trades/:id" element={<ProtectedRoute><TradeDetail /></ProtectedRoute>} />
+            <Route path="/estimator" element={<ProtectedRoute><EstimatorPage /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/users/:id" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
+            <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
+            <Route path="/reset-password/:token" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
+            
+            {/* Public Static Pages */}
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/blog" element={<BlogPage />} />
 
-          <Route path="/" element={<GuestRoute><LandingPage /></GuestRoute>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            <Route path="/" element={<GuestRoute><LandingPage /></GuestRoute>} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
       </Suspense>
     </BrowserRouter>
   );

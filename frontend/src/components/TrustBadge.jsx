@@ -1,6 +1,6 @@
-import { Star } from 'lucide-react';
+import { Star, CheckCircle } from 'lucide-react';
 
-export default function TrustBadge({ score, size = 'md' }) {
+export default function TrustBadge({ score, isVerified = false, size = 'md' }) {
   const stars = Math.round(score || 0);
   const label = score >= 4.5 ? 'Highly Trusted' : score >= 3.5 ? 'Trusted' : score >= 2 ? 'Building Trust' : 'New User';
 
@@ -23,8 +23,9 @@ export default function TrustBadge({ score, size = 'md' }) {
           />
         ))}
       </div>
-      <span style={{ fontSize: s.font, color: 'var(--color-text-secondary)' }}>
+      <span style={{ fontSize: s.font, color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: 4 }}>
         {score?.toFixed(1)} — {label}
+        {isVerified && <CheckCircle size={s.star} color="var(--color-brand-light)" fill="rgba(99,102,241,0.1)" />}
       </span>
     </div>
   );

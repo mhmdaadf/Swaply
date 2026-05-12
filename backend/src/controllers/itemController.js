@@ -1,6 +1,7 @@
 const Item = require('../models/Item');
 const { estimateValue, estimateValueSync } = require('../services/valueEstimator');
 const { getWizardResponse } = require('../services/listingWizard');
+const aiModerator = require('../services/aiModerator');
 
 // Parse desiredItems from multipart form data (may arrive as JSON string or comma-separated)
 function parseDesiredItems(raw) {
@@ -33,6 +34,20 @@ exports.createItem = async (req, res, next) => {
       desiredItems: parseDesiredItems(desiredItems),
       owner: req.user._id,
     });
+
+    // Perform AI Moderation
+    const moderation = await aiModerator.analyzeListing({ title, description, category, condition, estimatedValue: swapPointValue });
+    item.moderationRisk = moderation.riskLevel;
+    item.moderationFlags = moderation.flags;
+    item.moderationReasoning = moderation.reasoning;
+    item.moderationSuggestions = moderation.suggestions;
+
+    // If risk is High, set to pending_review
+    if (moderation.riskLevel === 'High') {
+      item.status = 'pending_review';
+    }
+
+    await item.save();
 
     res.status(201).json(item);
   } catch (err) {
@@ -95,6 +110,18 @@ exports.getMyItems = async (req, res, next) => {
   }
 };
 
+exports.getUserItems = async (req, res, next) => {
+  try {
+    const items = await Item.find({ 
+      owner: req.params.userId,
+      status: 'available' 
+    }).sort({ createdAt: -1 });
+    res.json(items);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.updateItem = async (req, res, next) => {
   try {
     const item = await Item.findById(req.params.id);
@@ -118,6 +145,28 @@ exports.updateItem = async (req, res, next) => {
     }
 
     Object.assign(item, updates);
+
+    // Re-evaluate moderation on major updates
+    if (updates.title || updates.description || updates.condition) {
+      const moderation = await aiModerator.analyzeListing({
+        title: item.title,
+        description: item.description,
+        category: item.category,
+        condition: item.condition,
+        estimatedValue: item.swapPointValue
+      });
+      item.moderationRisk = moderation.riskLevel;
+      item.moderationFlags = moderation.flags;
+      item.moderationReasoning = moderation.reasoning;
+      item.moderationSuggestions = moderation.suggestions;
+      
+      if (moderation.riskLevel === 'High') {
+        item.status = 'pending_review';
+      } else if (item.status === 'pending_review' && moderation.riskLevel === 'Low') {
+        item.status = 'available';
+      }
+    }
+
     await item.save();
     res.json(item);
   } catch (err) {
@@ -196,6 +245,15 @@ exports.wizardChat = async (req, res, next) => {
     const { messages, currentData } = req.body;
     const response = await getWizardResponse(messages, currentData);
     res.json(response);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.analyzeModeration = async (req, res, next) => {
+  try {
+    const analysis = await aiModerator.analyzeListing(req.body);
+    res.json(analysis);
   } catch (err) {
     next(err);
   }
