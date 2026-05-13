@@ -32,7 +32,7 @@ export default function ResetPasswordPage() {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: 20,
+      padding: 20, paddingTop: 'calc(var(--nav-height) + 20px)',
       background: 'radial-gradient(ellipse at top, rgba(99,102,241,0.08) 0%, transparent 60%)',
     }}>
       <div className="fade-in" style={{ width: '100%', maxWidth: 420 }}>

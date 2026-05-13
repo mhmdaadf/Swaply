@@ -90,8 +90,8 @@ exports.getTrades = async (req, res, next) => {
     if (status) filter.status = status;
 
     const trades = await Trade.find(filter)
-      .populate('initiator', 'username trustScore profilePic')
-      .populate('receiver', 'username trustScore profilePic')
+      .populate('initiator', 'username trustScore totalRatings profilePic')
+      .populate('receiver', 'username trustScore totalRatings profilePic')
       .populate('offeredItems', 'title images swapPointValue category')
       .populate('requestedItems', 'title images swapPointValue category')
       .sort({ createdAt: -1 });
@@ -105,8 +105,8 @@ exports.getTrades = async (req, res, next) => {
 exports.getTrade = async (req, res, next) => {
   try {
     const trade = await Trade.findById(req.params.id)
-      .populate('initiator', 'username trustScore profilePic')
-      .populate('receiver', 'username trustScore profilePic')
+      .populate('initiator', 'username trustScore totalRatings profilePic')
+      .populate('receiver', 'username trustScore totalRatings profilePic')
       .populate('offeredItems')
       .populate('requestedItems');
 
@@ -228,8 +228,8 @@ exports.updateTradeStatus = async (req, res, next) => {
     await trade.save();
 
     const populated = await Trade.findById(trade._id)
-      .populate('initiator', 'username trustScore profilePic')
-      .populate('receiver', 'username trustScore profilePic')
+      .populate('initiator', 'username trustScore totalRatings profilePic')
+      .populate('receiver', 'username trustScore totalRatings profilePic')
       .populate('offeredItems')
       .populate('requestedItems');
 

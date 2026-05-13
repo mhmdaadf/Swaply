@@ -7,10 +7,10 @@
  *   3. LLM returns swap-point value, reasoning, AND a confidence score
  *   4. AI value is used directly (clamped for safety) — NOT overridden by heuristic
  *
- * Fallback (no key): heuristic formula + SmartDemo template reasoning
+ * Fallback (no key): heuristic formula + Heuristic Engine template reasoning
  */
 
-const { chatCompletion, SmartDemo, hasKey } = require('./aiClient');
+const { chatCompletion, HeuristicEngine, hasKey } = require('./aiClient');
 
 // ---------- Depreciation tables (used for baseline & fallback) ----------
 
@@ -146,7 +146,7 @@ async function estimateValue({ category, originalPrice, condition, ageMonths, ti
   // Smart Demo Fallback
   return {
     swapPointValue: baseline,
-    reasoning: SmartDemo.generateReasoning({ title: title || category, category, condition, originalPrice }),
+    reasoning: HeuristicEngine.generateReasoning({ title: title || category, category, condition, originalPrice }),
     method: hasKey() ? 'ai-fallback' : 'demo',
     confidence: null,
     baseline,

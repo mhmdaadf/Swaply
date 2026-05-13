@@ -46,7 +46,7 @@ export default function ItemCard({ item, showOwner = true }) {
               </div>
               <div className="ic-trust">
                 <Star size={11} className="star-filled" fill="var(--color-accent)" />
-                <span>{item.owner.trustScore?.toFixed(1)}</span>
+                <span>{item.owner.totalRatings > 0 ? item.owner.trustScore?.toFixed(1) : 'New'}</span>
               </div>
             </div>
           )}

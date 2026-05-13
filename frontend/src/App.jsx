@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { useAuthStore } from './store/authStore';
 import Navbar from './components/Navbar';
+import ScrollToTop from './components/ScrollToTop';
 
 // Eager-loaded (critical path)
 import LoginPage from './pages/LoginPage';
@@ -59,6 +60,7 @@ function GuestRoute({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Navbar />
       <Suspense fallback={<PageLoader />}>
         <div className="page-transition-wrapper">

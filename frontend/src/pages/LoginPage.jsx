@@ -74,17 +74,13 @@ export default function LoginPage() {
             <Link to="/register">Create an account</Link>
           </p>
         </div>
-
-        {/* Demo Hint */}
-        <div className="auth-hint">
-          <span className="auth-hint-dot" /> Demo credentials: <strong>alice@test.com</strong> / <strong>password123</strong>
-        </div>
       </div>
 
       <style>{`
         .auth-page {
           min-height: 100vh; display: flex; align-items: center; justify-content: center;
-          padding: var(--space-6); position: relative; overflow: hidden;
+          padding: var(--space-6); padding-top: calc(var(--nav-height) + var(--space-6));
+          position: relative; overflow: hidden;
           background: var(--color-surface-0);
         }
         .auth-bg {
@@ -156,21 +152,6 @@ export default function LoginPage() {
         .auth-switch { text-align: center; font-size: var(--text-base); color: var(--color-text-muted); }
         .auth-switch a { color: var(--color-brand-light); font-weight: 600; }
         .auth-switch a:hover { text-decoration: underline; }
-
-        /* Hint */
-        .auth-hint {
-          margin-top: var(--space-5); padding: var(--space-3) var(--space-4);
-          border-radius: var(--radius);
-          background: rgba(99,102,241,0.03); border: 1px solid rgba(99,102,241,0.06);
-          font-size: var(--text-sm); color: var(--color-text-muted); text-align: center;
-          display: flex; align-items: center; justify-content: center; gap: var(--space-2);
-        }
-        .auth-hint strong { color: var(--color-brand-light); font-weight: 600; }
-        .auth-hint-dot {
-          width: 6px; height: 6px; border-radius: 50%;
-          background: var(--color-success); flex-shrink: 0;
-          animation: pulse 2s ease-in-out infinite;
-        }
 
         @media (max-width: 480px) {
           .auth-card { padding: var(--space-6) var(--space-5); border-radius: var(--radius-lg); }

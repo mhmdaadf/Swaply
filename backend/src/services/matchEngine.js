@@ -7,11 +7,11 @@
  *   3. LLM returns 0-10 relevance scores WITH natural-language reasoning
  *   4. Scores drive final match ranking
  *
- * Fallback (no key): Jaccard word-overlap heuristic via SmartDemo
+ * Fallback (no key): Jaccard word-overlap heuristic via Heuristic Engine
  */
 
 const Item = require('../models/Item');
-const { chatCompletion, SmartDemo, hasKey } = require('./aiClient');
+const { chatCompletion, HeuristicEngine, hasKey } = require('./aiClient');
 
 // ---------- Heuristic fallback helpers ----------
 
@@ -165,10 +165,10 @@ async function findMatches(userId) {
         }
       });
     } else {
-      // --- Fallback: SmartDemo heuristic ---
+      // --- Fallback: Heuristic Engine ---
       items.forEach(item => {
         let score = 0;
-        const sim = SmartDemo.calculateSimilarity(itemToText(item), [...myDesired].join(' '));
+        const sim = HeuristicEngine.calculateSimilarity(itemToText(item), [...myDesired].join(' '));
         if (sim > 0.15) score = 10;
         else if (sim > 0.05) score = 5;
 
@@ -179,7 +179,7 @@ async function findMatches(userId) {
 
       myItems.forEach(item => {
         let score = 0;
-        const sim = SmartDemo.calculateSimilarity(itemToText(item), [...theirDesired].join(' '));
+        const sim = HeuristicEngine.calculateSimilarity(itemToText(item), [...theirDesired].join(' '));
         if (sim > 0.15) score = 10;
         else if (sim > 0.05) score = 5;
 

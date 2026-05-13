@@ -84,7 +84,8 @@ export default function RegisterPage() {
       <style>{`
         .auth-page {
           min-height: 100vh; display: flex; align-items: center; justify-content: center;
-          padding: var(--space-6); position: relative; overflow: hidden;
+          padding: var(--space-6); padding-top: calc(var(--nav-height) + var(--space-6));
+          position: relative; overflow: hidden;
           background: var(--color-surface-0);
         }
         .auth-bg {

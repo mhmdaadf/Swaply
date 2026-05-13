@@ -57,7 +57,7 @@ export default function Navbar() {
                     )}
                   </div>
                   <span className="nav-user-name">{user.username}</span>
-                  <span className="nav-user-score">{user.trustScore?.toFixed(1)}</span>
+                  <span className="nav-user-score">{user.totalRatings > 0 ? user.trustScore?.toFixed(1) : 'New'}</span>
                 </Link>
               </div>
             </>

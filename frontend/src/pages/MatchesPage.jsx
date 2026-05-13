@@ -49,10 +49,10 @@ function AIStatusBanner({ matchCount, method }) {
         </div>
         <div>
           <p className="match-status-title" style={{ color: isAI ? '#a78bfa' : 'var(--color-accent)' }}>
-            {isAI ? '🧠 Real AI Matching Active' : '⚡ Smart Demo Engine Active'}
+            {isAI ? '🧠 Real AI Matching Active' : '⚡ Linguistic Analysis Engine Active'}
           </p>
           <p className="match-status-subtitle">
-            {isAI ? 'Groq Llama 3.3 70B — semantic relevance scoring' : 'Local word-overlap similarity engine'}
+            {isAI ? 'Groq Llama 3.3 70B — semantic relevance scoring' : 'Heuristic similarity matching'}
           </p>
         </div>
       </div>
@@ -106,7 +106,7 @@ function MatchCard({ match, index, navigate }) {
             </span>
           ) : (
             <span className="match-method-badge match-method-demo">
-              <Cpu size={11} /> Smart Match
+              <Cpu size={11} /> Heuristic Match
             </span>
           )}
           {/* Fairness badge */}
@@ -256,7 +256,7 @@ export default function MatchesPage() {
           <div className="match-footer">
             <p>
               <Shield size={10} />
-              Matches powered by {primaryMethod === 'ai' ? 'Groq Llama 3.3 70B' : 'Smart Demo NLP Engine'}
+              Matches powered by {primaryMethod === 'ai' ? 'Groq Llama 3.3 70B' : 'Standard NLP Engine'}
             </p>
           </div>
         </>

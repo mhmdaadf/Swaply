@@ -72,7 +72,7 @@ exports.getItems = async (req, res, next) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [items, total] = await Promise.all([
       Item.find(filter)
-        .populate('owner', 'username trustScore profilePic')
+        .populate('owner', 'username trustScore totalRatings profilePic')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit)),
@@ -93,7 +93,7 @@ exports.getItems = async (req, res, next) => {
 exports.getItem = async (req, res, next) => {
   try {
     const item = await Item.findById(req.params.id)
-      .populate('owner', 'username trustScore profilePic email');
+      .populate('owner', 'username trustScore totalRatings profilePic email');
     if (!item) return res.status(404).json({ message: 'Item not found' });
     res.json(item);
   } catch (err) {

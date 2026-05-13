@@ -147,7 +147,7 @@ export default function ProfilePage() {
           <div className="pf-trust-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-3)' }}>
               <span style={{ fontSize: 'var(--text-base)', fontWeight: 600 }}>Trust Score</span>
-              <TrustBadge score={user.trustScore} isVerified={user.isVerified} />
+              <TrustBadge score={user.trustScore} totalRatings={user.totalRatings} isVerified={user.isVerified} />
             </div>
             <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
               Based on {user.totalRatings || 0} community ratings. Maintain a high score by completing fair trades.

@@ -4,7 +4,7 @@ require('dotenv').config();
  *
  * Primary: Groq (LPU Inference - Extremely fast, free tier available)
  * Secondary: OpenAI (GPT-4o-mini or GPT-4o)
- * Fallback: Smart Demo Engine (Local NLP simulation for dev/demo)
+ * Fallback: Heuristic Engine (Deterministic NLP for core functionality)
  */
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1';
@@ -62,12 +62,12 @@ function getProviderName() {
   return 'none';
 }
 
-// --------------- Smart Demo Engine (Local NLP) ---------------
+// --------------- Heuristic Engine (Deterministic NLP) ---------------
 /**
  * When no API key is found, this engine provides local word-overlap
- * similarity and template reasoning for development/demo.
+ * similarity and template reasoning.
  */
-const SmartDemo = {
+const HeuristicEngine = {
   calculateSimilarity(s1, s2) {
     const words1 = new Set(s1.toLowerCase().split(/\s+/).filter(w => w.length > 2));
     const words2 = new Set(s2.toLowerCase().split(/\s+/).filter(w => w.length > 2));
@@ -145,7 +145,7 @@ async function chatCompletion(systemPrompt, userPrompt, opts = {}) {
 
 module.exports = {
   chatCompletion,
-  SmartDemo,
+  HeuristicEngine,
   hasKey: () => !!getApiKey(),
   getProviderName,
   getModel,

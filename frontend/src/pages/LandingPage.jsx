@@ -43,7 +43,7 @@ export default function LandingPage() {
       category: 'Furniture',
       condition: 'Good',
       swapPointValue: 850,
-      images: ['https://images.unsplash.com/photo-1580480055273-228ff5388ef8?auto=format&fit=crop&q=80&w=400'],
+      images: ['https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&q=80&w=400'],
       owner: { username: 'MikeR', trustScore: 4.7 }
     },
     {

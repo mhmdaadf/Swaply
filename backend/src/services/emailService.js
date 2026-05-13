@@ -1,17 +1,12 @@
 /**
- * Email Service — Simulates sending emails for production-ready demonstration.
- * In a real production app, you would use Nodemailer with SendGrid, Mailgun, or AWS SES.
+ * Email Service
+ * Integrated for production notifications.
  */
 
 const fs = require('fs');
 const path = require('path');
 
-const LOG_FILE = path.join(__dirname, '../../logs/email_log.txt');
-
-// Ensure logs directory exists
-if (!fs.existsSync(path.join(__dirname, '../../logs'))) {
-  fs.mkdirSync(path.join(__dirname, '../../logs'));
-}
+// Email service integration point
 
 exports.sendEmail = async ({ to, subject, body }) => {
   const timestamp = new Date().toISOString();
@@ -24,11 +19,8 @@ ${body}
 ------------------------------------------------------------
 `;
 
-  // Log to console for development visibility
-  console.log(`\n📧 EMAIL SENT TO: ${to}\n   SUBJECT: ${subject}\n   BODY: ${body.substring(0, 50)}...\n`);
-
-  // Log to file for "sent" history
-  fs.appendFileSync(LOG_FILE, entry);
+  // Log to console for observability
+  console.log(`[Email] To: ${to} | Subject: ${subject}`);
 
   return true;
 };

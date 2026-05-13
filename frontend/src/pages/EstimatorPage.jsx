@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../lib/api';
-import { Sparkles, TrendingUp, Brain, Cpu, Zap, BarChart3, Shield, Activity, ArrowRight, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, TrendingUp, Brain, Cpu, Zap, BarChart3, Shield, Activity, ArrowRight, Info, ChevronDown, ChevronUp, Search } from 'lucide-react';
 
 const CATEGORIES = ['Electronics','Books','Clothing','Furniture','Sports','Toys','Music','Art','Tools','Automotive','Collectibles','Other'];
 const CONDITIONS = ['New','Like New','Good','Fair','Poor'];
@@ -168,7 +168,7 @@ function AIResultCard({ result }) {
           {isDemo && (
             <div className="ai-badge ai-badge-demo">
               <Cpu size={13} />
-              <span>Smart Demo Engine</span>
+              <span>Standard Analysis Engine</span>
             </div>
           )}
           {isFallback && (
@@ -207,7 +207,7 @@ function AIResultCard({ result }) {
           <div className={`ai-reasoning ${isAI ? 'ai-reasoning-ai' : 'ai-reasoning-demo'}`}>
             <div className="ai-reasoning-header">
               <Brain size={12} style={{ color: isAI ? '#a78bfa' : 'var(--color-accent)' }} />
-              <span>{isAI ? 'AI Analysis' : 'Smart Analysis'}</span>
+              <span>{isAI ? 'AI Analysis' : 'Statistical Analysis'}</span>
             </div>
             <p className="ai-reasoning-text">
               "{typedReasoning}"
@@ -585,23 +585,22 @@ export default function EstimatorPage() {
           color: var(--color-text-muted); display: flex; align-items: center; gap: 4px;
         }
         .ai-detail-value { color: var(--color-text-secondary); font-weight: 500; }
-+
-+        .ai-internal-comparison {
-+          margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);
-+          text-align: left;
-+        }
-+        .ai-internal-title {
-+          font-size: 0.65rem; font-weight: 700; color: #a78bfa;
-+          text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
-+          display: flex; align-items: center; gap: 4px;
-+        }
-+        .ai-internal-list { display: flex; flex-direction: column; gap: 4px; }
-+        .ai-internal-item {
-+          display: flex; justify-content: space-between; font-size: 0.72rem;
-+          background: rgba(255,255,255,0.03); padding: 4px 8px; border-radius: 4px;
-+        }
-+        .ai-internal-name { color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
-+        .ai-internal-val { color: var(--color-brand-light); font-weight: 700; }
+        .ai-internal-comparison {
+          margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);
+          text-align: left;
+        }
+        .ai-internal-title {
+          font-size: 0.65rem; font-weight: 700; color: #a78bfa;
+          text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
+          display: flex; align-items: center; gap: 4px;
+        }
+        .ai-internal-list { display: flex; flex-direction: column; gap: 4px; }
+        .ai-internal-item {
+          display: flex; justify-content: space-between; font-size: 0.72rem;
+          background: rgba(255,255,255,0.03); padding: 4px 8px; border-radius: 4px;
+        }
+        .ai-internal-name { color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+        .ai-internal-val { color: var(--color-brand-light); font-weight: 700; }
 
         /* --- Page-level --- */
         .ai-page-badge {
