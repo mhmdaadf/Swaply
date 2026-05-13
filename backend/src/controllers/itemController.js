@@ -242,8 +242,8 @@ exports.estimateItemValue = async (req, res, next) => {
 
 exports.wizardChat = async (req, res, next) => {
   try {
-    const { messages, currentData } = req.body;
-    const response = await getWizardResponse(messages, currentData);
+    const { messages, extractedFields, currentData } = req.body;
+    const response = await getWizardResponse(messages, extractedFields || currentData || {});
     res.json(response);
   } catch (err) {
     next(err);

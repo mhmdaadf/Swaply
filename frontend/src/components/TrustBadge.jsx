@@ -26,7 +26,7 @@ export default function TrustBadge({ score, totalRatings = 0, isVerified = false
         ))}
       </div>
       <span style={{ fontSize: s.font, color: isNew ? 'var(--color-text-ghost)' : 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: 4 }}>
-        {isNew ? 'New Member' : `${score?.toFixed(1)} — ${label}`}
+        {isNew ? 'New Member' : `${(score || 0).toFixed(1)} — ${label}`}
         {isVerified && <CheckCircle size={s.star} color="var(--color-brand-light)" fill="rgba(99,102,241,0.1)" />}
       </span>
     </div>

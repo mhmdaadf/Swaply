@@ -35,6 +35,8 @@ export default function Dashboard() {
         const [i, t, m] = await Promise.all([api.get('/items/my'), api.get('/trades'), api.get('/matches')]);
         setMyItems(i.data);
         setStats({ trades: t.data.length, matches: m.data.length });
+        // Auto-sync user profile to catch role updates (like Superadmin)
+        await useAuthStore.getState().fetchMe();
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     };

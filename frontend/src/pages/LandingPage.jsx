@@ -374,7 +374,6 @@ export default function LandingPage() {
               <div>
                 <h5>Platform</h5>
                 <Link to="/explore">Marketplace</Link>
-                <Link to="/estimator">Estimator</Link>
                 <Link to="/matches">Smart Swaps</Link>
               </div>
               <div>

@@ -1,21 +1,40 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Brain, Send, X, Package, CheckCircle2, ChevronRight, Sparkles, Wand2 } from 'lucide-react';
+import { Brain, Send, X, CheckCircle2, Sparkles, Tag, Clock, DollarSign, Package } from 'lucide-react';
 import api from '../lib/api';
+
+const FIELD_INDICATORS = [
+  { key: 'itemName', label: 'Item', icon: Package },
+  { key: 'category', label: 'Category', icon: Tag },
+  { key: 'condition', label: 'Condition', icon: CheckCircle2 },
+  { key: 'originalPrice', label: 'Price', icon: DollarSign },
+  { key: 'ageMonths', label: 'Age', icon: Clock },
+];
 
 export default function ListingWizard({ onClose, onComplete }) {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hi! I'm your Smart AI Assistant. ✨ What would you like to list today? Just tell me the name of the item!" }
+    { role: 'assistant', content: "What are you listing? Give me as much detail as you can — name, condition, age, price — and I'll handle the rest." }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [currentData, setCurrentData] = useState({});
+  const [extractedFields, setExtractedFields] = useState({});
   const [recommendation, setRecommendation] = useState(null);
+  const [turnCount, setTurnCount] = useState(0);
   const chatEndRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [loading]);
+
+  const filledCount = FIELD_INDICATORS.filter(f => {
+    const val = extractedFields[f.key];
+    return val !== null && val !== undefined && val !== '';
+  }).length;
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -26,11 +45,12 @@ export default function ListingWizard({ onClose, onComplete }) {
     setMessages(newMessages);
     setInput('');
     setLoading(true);
+    setTurnCount(prev => prev + 1);
 
     try {
       const { data } = await api.post('/items/wizard-chat', {
         messages: newMessages,
-        currentData
+        extractedFields
       });
 
       if (data.isComplete) {
@@ -38,18 +58,19 @@ export default function ListingWizard({ onClose, onComplete }) {
         setMessages([...newMessages, { role: 'assistant', content: data.message }]);
       } else {
         setMessages([...newMessages, { role: 'assistant', content: data.message }]);
-        if (data.currentData) setCurrentData(data.currentData);
+        if (data.extractedFields) setExtractedFields(prev => ({ ...prev, ...data.extractedFields }));
+        // Legacy support
+        if (data.currentData) setExtractedFields(prev => ({ ...prev, ...data.currentData }));
       }
     } catch (err) {
       console.error(err);
-      setMessages([...newMessages, { role: 'assistant', content: "I'm sorry, I hit a snag. Let's try that again!" }]);
+      setMessages([...newMessages, { role: 'assistant', content: "Connection hiccup — try again." }]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePost = async () => {
-    // In a real app, we'd navigate to a confirm page or just post
+  const handlePost = () => {
     onComplete(recommendation);
   };
 
@@ -65,10 +86,25 @@ export default function ListingWizard({ onClose, onComplete }) {
             </div>
             <div>
               <h3>Smart AI Lister</h3>
-              <p className="status">{loading ? 'AI is thinking...' : 'Online'}</p>
+              <p className="status">{loading ? 'Analyzing...' : `${filledCount}/${FIELD_INDICATORS.length} fields detected`}</p>
             </div>
           </div>
           <button className="close-btn" onClick={onClose} aria-label="Close"><X size={16} /></button>
+        </div>
+
+        {/* Field Progress Bar */}
+        <div className="wizard-progress">
+          {FIELD_INDICATORS.map(({ key, label, icon: Icon }) => {
+            const val = extractedFields[key];
+            const filled = val !== null && val !== undefined && val !== '';
+            return (
+              <div key={key} className={`progress-chip ${filled ? 'filled' : ''}`} title={filled ? `${label}: ${val}` : `${label}: pending`}>
+                <Icon size={11} />
+                <span>{label}</span>
+                {filled && <CheckCircle2 size={9} className="check-icon" />}
+              </div>
+            );
+          })}
         </div>
 
         {/* Chat Area */}
@@ -96,7 +132,7 @@ export default function ListingWizard({ onClose, onComplete }) {
             <div className="recommendation-panel slide-up">
               <div className="rec-header">
                 <CheckCircle2 size={18} color="#22c55e" />
-                <span>Optimized Listing Ready!</span>
+                <span>Listing Ready — {turnCount} {turnCount === 1 ? 'turn' : 'turns'}</span>
               </div>
               <div className="rec-card">
                 <div className="rec-row">
@@ -104,12 +140,16 @@ export default function ListingWizard({ onClose, onComplete }) {
                   <span className="rec-val">{recommendation.title}</span>
                 </div>
                 <div className="rec-row">
-                  <span className="rec-label">Recommended Value</span>
+                  <span className="rec-label">Value</span>
                   <span className="rec-val pts">{recommendation.swapPointValue} pts</span>
                 </div>
                 <div className="rec-row">
                    <span className="rec-label">Category</span>
                    <span className="rec-val">{recommendation.category}</span>
+                </div>
+                <div className="rec-row">
+                   <span className="rec-label">Condition</span>
+                   <span className="rec-val">{recommendation.condition}</span>
                 </div>
                 <p className="rec-desc">{recommendation.description}</p>
               </div>
@@ -120,9 +160,10 @@ export default function ListingWizard({ onClose, onComplete }) {
           ) : (
             <form onSubmit={handleSend} className="input-row">
               <input
+                ref={inputRef}
                 className="input"
                 type="text"
-                placeholder="Type your answer..."
+                placeholder={turnCount === 0 ? 'e.g. iPhone 13 Pro, good condition, bought for $999 last year' : 'Type your answer...'}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={loading}
@@ -136,7 +177,7 @@ export default function ListingWizard({ onClose, onComplete }) {
       </div>
 
       <style>{`
-        /* ═══ ListingWizard — Enterprise Polish ═══ */
+        /* ═══ ListingWizard v2 ═══ */
         .wizard-container {
           display: flex; flex-direction: column; overflow: hidden;
           width: 100%; max-width: 600px; 
@@ -164,7 +205,7 @@ export default function ListingWizard({ onClose, onComplete }) {
           animation: ring-pulse 2s infinite;
         }
         .wizard-header h3 { font-size: var(--text-md); font-weight: 700; color: #fff; margin: 0; }
-        .status { font-size: var(--text-xs); color: var(--color-success); margin: 0; font-weight: 600; }
+        .status { font-size: var(--text-xs); color: var(--color-brand-light); margin: 0; font-weight: 600; }
         .close-btn { 
           background: var(--color-surface-2); border: 1px solid var(--color-border); 
           border-radius: var(--radius-sm); color: var(--color-text-muted); 
@@ -174,6 +215,29 @@ export default function ListingWizard({ onClose, onComplete }) {
         .close-btn:hover { border-color: var(--color-border-hover); color: var(--color-text-primary); }
         .close-btn:active { transform: scale(0.95); }
 
+        /* ── Progress Bar ── */
+        .wizard-progress {
+          display: flex; gap: 6px; padding: 10px var(--space-6);
+          border-bottom: 1px solid var(--color-border-subtle);
+          background: rgba(0,0,0,0.1);
+          overflow-x: auto;
+        }
+        .progress-chip {
+          display: flex; align-items: center; gap: 4px;
+          padding: 4px 10px; border-radius: var(--radius-full);
+          font-size: 0.65rem; font-weight: 600; white-space: nowrap;
+          background: rgba(255,255,255,0.03);
+          color: var(--color-text-ghost);
+          border: 1px solid var(--color-border-subtle);
+          transition: all 0.3s ease;
+        }
+        .progress-chip.filled {
+          background: rgba(34, 197, 94, 0.1);
+          color: #22c55e;
+          border-color: rgba(34, 197, 94, 0.25);
+        }
+        .check-icon { margin-left: 2px; }
+
         .chat-area { 
           flex: 1; overflow-y: auto; padding: var(--space-6); 
           display: flex; flex-direction: column; gap: var(--space-4); 
@@ -182,7 +246,7 @@ export default function ListingWizard({ onClose, onComplete }) {
         .message-row.assistant { justify-content: flex-start; }
         .message-row.user { justify-content: flex-end; }
         .message-bubble {
-          max-width: 80%; padding: var(--space-3) var(--space-5); border-radius: var(--radius-lg);
+          max-width: 85%; padding: var(--space-3) var(--space-5); border-radius: var(--radius-lg);
           font-size: var(--text-md); line-height: 1.6;
         }
         .assistant .message-bubble { background: var(--color-surface-4); color: #fff; border-bottom-left-radius: var(--radius-xs); }
@@ -216,7 +280,7 @@ export default function ListingWizard({ onClose, onComplete }) {
         }
         .rec-row { display: flex; justify-content: space-between; margin-bottom: var(--space-2); font-size: var(--text-base); }
         .rec-label { color: var(--color-text-muted); font-weight: 500; }
-        .rec-val { color: #fff; font-weight: 600; }
+        .rec-val { color: #fff; font-weight: 600; text-align: right; max-width: 60%; }
         .rec-val.pts { color: var(--color-accent); font-weight: 800; }
         .rec-desc { 
           font-size: var(--text-sm); color: var(--color-text-secondary); 

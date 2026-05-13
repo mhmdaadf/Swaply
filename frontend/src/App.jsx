@@ -10,7 +10,7 @@ import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
 
-// Lazy-loaded (non-critical, loaded on demand)
+import ProfilePage from './pages/ProfilePage';
 const ExplorePage = lazy(() => import('./pages/ExplorePage'));
 const ItemDetail = lazy(() => import('./pages/ItemDetail'));
 const NewItemPage = lazy(() => import('./pages/NewItemPage'));
@@ -18,8 +18,6 @@ const MatchesPage = lazy(() => import('./pages/MatchesPage'));
 const TradesPage = lazy(() => import('./pages/TradesPage'));
 const TradeDetail = lazy(() => import('./pages/TradeDetail'));
 const NewTradePage = lazy(() => import('./pages/NewTradePage'));
-const EstimatorPage = lazy(() => import('./pages/EstimatorPage'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
@@ -75,7 +73,6 @@ export default function App() {
             <Route path="/trades" element={<ProtectedRoute><TradesPage /></ProtectedRoute>} />
             <Route path="/trades/new" element={<ProtectedRoute><NewTradePage /></ProtectedRoute>} />
             <Route path="/trades/:id" element={<ProtectedRoute><TradeDetail /></ProtectedRoute>} />
-            <Route path="/estimator" element={<ProtectedRoute><EstimatorPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="/users/:id" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />

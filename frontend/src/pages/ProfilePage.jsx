@@ -6,6 +6,7 @@ import TrustBadge from '../components/TrustBadge';
 import RatingDistribution from '../components/RatingDistribution';
 import ReviewList from '../components/ReviewList';
 import { User, Mail, Calendar, Package, ArrowRightLeft, Star, Heart, LogOut, Edit3, Check, X, Loader2, Shield } from 'lucide-react';
+import { getImageUrl } from '../lib/utils';
 
 const CATEGORIES = ['Electronics','Books','Clothing','Furniture','Sports','Toys','Music','Art','Tools','Automotive','Collectibles','Other'];
 
@@ -52,7 +53,7 @@ export default function ProfilePage() {
   };
 
   if (!user) return null;
-  const joinDate = new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const joinDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Member';
 
   return (
     <div className="page-container fade-in" style={{ paddingTop: 'calc(var(--nav-height) + var(--space-8))', maxWidth: 800 }}>
@@ -70,7 +71,14 @@ export default function ProfilePage() {
             user.username?.charAt(0).toUpperCase()
           )}
         </div>
-        <h1 className="page-title" style={{ fontSize: 'var(--text-3xl)' }}>{user.username}</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+          <h1 className="page-title" style={{ fontSize: 'var(--text-3xl)', margin: 0 }}>{user.username}</h1>
+          {(user.role === 'admin' || user.role === 'superadmin') && (
+            <span className="badge badge-accent" style={{ padding: '4px 10px', textTransform: 'uppercase', fontSize: '0.65rem', fontWeight: 900, letterSpacing: '0.05em' }}>
+              <Shield size={10} style={{ marginRight: 4 }} /> {user.role}
+            </span>
+          )}
+        </div>
         <p className="page-subtitle">Member since {joinDate}</p>
       </div>
 
@@ -147,7 +155,7 @@ export default function ProfilePage() {
           <div className="pf-trust-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-3)' }}>
               <span style={{ fontSize: 'var(--text-base)', fontWeight: 600 }}>Trust Score</span>
-              <TrustBadge score={user.trustScore} totalRatings={user.totalRatings} isVerified={user.isVerified} />
+              <TrustBadge score={user.trustScore || 0} totalRatings={user.totalRatings || 0} isVerified={user.isVerified} />
             </div>
             <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
               Based on {user.totalRatings || 0} community ratings. Maintain a high score by completing fair trades.

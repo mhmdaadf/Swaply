@@ -132,7 +132,7 @@ export default function TradeDetail() {
               <h3>Trade with {other?.username || 'User'}</h3>
               <div className="td-trust">
                 <Star size={12} fill="var(--color-accent)" color="var(--color-accent)" />
-                <span>{other?.totalRatings > 0 ? `${other.trustScore.toFixed(1)} Trust Score` : 'New Member'}</span>
+                <span>{(other?.totalRatings || 0) > 0 ? (other?.trustScore || 0).toFixed(1) : 'New Member'}</span>
               </div>
             </div>
           </div>

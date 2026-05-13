@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { LayoutDashboard, Search, ArrowRightLeft, Sparkles, User, Shield } from 'lucide-react';
+import { LayoutDashboard, Sparkles, ArrowRightLeft, Search, User, LogOut, Shield } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
 const NAV_ITEMS = [
@@ -47,6 +47,12 @@ export default function Navbar() {
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                {(user.role === 'admin' || user.role === 'superadmin') && (
+                  <Link to="/admin" className="nav-link" title="Admin Dashboard" style={{ color: 'var(--color-brand-light)' }}>
+                    <Shield size={16} />
+                    <span className="nav-link-label">Admin</span>
+                  </Link>
+                )}
                 <NotificationBell />
                 <Link to="/profile" className="nav-user" aria-label={`Profile: ${user.username}`}>
                   <div className="nav-user-avatar">
@@ -57,7 +63,7 @@ export default function Navbar() {
                     )}
                   </div>
                   <span className="nav-user-name">{user.username}</span>
-                  <span className="nav-user-score">{user.totalRatings > 0 ? user.trustScore?.toFixed(1) : 'New'}</span>
+                  <span className="nav-user-score">{(user.totalRatings || 0) > 0 ? (user.trustScore || 0).toFixed(1) : 'New'}</span>
                 </Link>
               </div>
             </>
